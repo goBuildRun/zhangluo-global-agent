@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小張羅 Zhangluo — Fiduciary Household & Taste Orchestration Agent</title>
+  <style>
+    :root {
+      --deep-charcoal: #1A1A1E;
+      --deep-charcoal-light: #242428;
+      --yuanshan-dai: #5B8C7A;
+      --yuanshan-dai-light: #6FA08E;
+      --nuan-hupo: #D4A056;
+      --nuan-hupo-light: #E0B470;
+      --frost-white: #F2F0EB;
+      --frost-white-dim: #D4D2CD;
+      --moonstone: #8A8A8F;
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
+      background: radial-gradient(circle at top right, rgba(91, 140, 122, 0.16), transparent 45%), var(--deep-charcoal);
+      color: var(--frost-white);
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+    .topbar {
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(26, 26, 30, 0.92);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand-row { display: flex; align-items: center; gap: 14px; }
+    .seal-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--nuan-hupo);
+      background: radial-gradient(circle, rgba(91, 140, 122, 0.28), rgba(26, 26, 30, 0.95));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "Songti SC", "Noto Serif SC", serif;
+      color: var(--nuan-hupo);
+      line-height: 1.05;
+      box-shadow: 0 0 14px rgba(212, 160, 86, 0.22);
+      flex-shrink: 0;
+    }
+    .seal-logo .top-char { font-size: 12px; font-weight: 700; }
+    .seal-logo .bot-chars { font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+    .brand-title { font-size: 17px; font-weight: 700; }
+    .brand-sub { font-size: 11.5px; color: var(--moonstone); }
+    .controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill-btn {
+      background: var(--deep-charcoal-light);
+      color: var(--frost-white-dim);
+      border: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn.active, .pill-btn:hover {
+      border-color: var(--nuan-hupo);
+      color: var(--nuan-hupo-light);
+      background: rgba(212, 160, 86, 0.12);
+    }
+    .container {
+      max-width: 1240px;
+      margin: 18px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1.4fr 0.85fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) { .container { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--deep-charcoal-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .solar-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(91, 140, 122, 0.22), rgba(212, 160, 86, 0.12));
+      border: 1px solid rgba(91, 140, 122, 0.35);
+      margin-bottom: 14px;
+    }
+    .solar-tag { font-size: 12px; font-weight: 700; color: var(--nuan-hupo-light); }
+    .solar-desc { font-size: 12.5px; color: var(--frost-white-dim); margin-top: 4px; }
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      padding: 10px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--deep-charcoal);
+      color: var(--frost-white-dim);
+      cursor: pointer;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      background: rgba(91, 140, 122, 0.22);
+      border-color: var(--yuanshan-dai);
+      color: var(--frost-white);
+    }
+    .tab-btn span { display: block; font-size: 10.5px; color: var(--moonstone); font-weight: 400; margin-top: 2px; }
+    .omni-box { display: flex; gap: 8px; margin-bottom: 10px; }
+    .omni-input {
+      flex: 1;
+      background: var(--deep-charcoal);
+      border: 1px solid rgba(91, 140, 122, 0.45);
+      color: var(--frost-white);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+    }
+    .primary-btn {
+      background: var(--yuanshan-dai);
+      color: #fff;
+      border: none;
+      padding: 0 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .amber-btn {
+      background: var(--nuan-hupo);
+      color: #1A1A1E;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .card {
+      background: var(--deep-charcoal);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: rgba(91, 140, 122, 0.22); color: #8FD4BE; border: 1px solid rgba(91, 140, 122, 0.4); }
+    .badge-amber { background: rgba(212, 160, 86, 0.18); color: var(--nuan-hupo-light); border: 1px solid rgba(212, 160, 86, 0.4); }
+    .card-title { font-size: 14.5px; font-weight: 700; color: var(--frost-white); }
+    .card-meta { font-size: 12px; color: var(--moonstone); margin: 4px 0 8px; }
+    .anti-noise-box {
+      background: rgba(91, 140, 122, 0.1);
+      border-left: 3px solid var(--yuanshan-dai);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--frost-white-dim);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+    }
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .stage-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
+    .stage-item {
+      background: var(--deep-charcoal);
+      border: 1px solid var(--glass-border);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .stage-item strong { color: var(--nuan-hupo-light); display: block; margin-bottom: 2px; }
+    .telemetry-box {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      background: #121215;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px;
+      color: #9FE6CF;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .toast {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(91, 140, 122, 0.28);
+      border: 1px solid var(--yuanshan-dai);
+      font-size: 12.5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-row">
+      <div class="seal-logo" title="小張羅 Circular Seal">
+        <span class="top-char">小</span>
+        <span class="bot-chars">張羅</span>
+      </div>
+      <div>
+        <div class="brand-title">Zhangluo (小張羅) · iOS & Multi-Modal Fiduciary Household Agent</div>
+        <div class="brand-sub">12s Video Sweep · 4-Pillar Household Ledger (粮仓/家当/待客礼单/维保) · 2,843-County AAA Terroir · OpenViking Memory</div>
+      </div>
+    </div>
+    <div class="controls-row">
+      <button class="pill-btn active" onclick="setTrackMode('all', this)">🏆 Full Matrix</button>
+      <button class="pill-btn" onclick="setTrackMode('qloo', this)">🎨 Qloo Taste AI ($50k)</button>
+      <button class="pill-btn" onclick="setTrackMode('paypal', this)">💳 PayPal Agentic Commerce ($67.5k)</button>
+      <button class="pill-btn" onclick="setTrackMode('nebius', this)">⚡ Nebius × NVIDIA + Tavily ($53k)</button>
+      <button class="pill-btn active" id="lang-btn" onclick="toggleLang()">🌐 EN / 中文</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="solar-banner">
+        <div>
+          <div class="solar-tag" id="solar-title">24 SOLAR TERMS · 霜降 FROST'S DESCENT</div>
+          <div class="solar-desc" id="solar-desc"></div>
+        </div>
+        <span class="badge badge-amber">iOS ShareExtension + EventKit</span>
+      </div>
+
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab('orchestrate', this)">
+          找张罗 Orchestrate
+          <span>Omni-Input & Cards</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('ledger', this)">
+          起居簿 Household
+          <span>粮仓·家当·待客·礼单</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('terroir', this)">
+          风物志 Solar Terroir
+          <span>Qloo × AAA Anti-Noise</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('memory', this)">
+          自留地 Sovereign
+          <span>Taste Star Graph & Consent</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: 找张罗 Orchestrate -->
+      <div id="tab-orchestrate" class="tab-pane">
+        <div class="omni-box">
+          <input id="omni-input" class="omni-input" value="Frost's Descent: check winter duvet & storage boxes, plan gout-safe dinner for Mr. Wang with expiring granary bamboo shoots, and prepare return gift for Old Chen." />
+          <button class="primary-btn" onclick="runOrchestrate()">张罗 Orchestrate</button>
+        </div>
+        <div class="card" style="border-color: rgba(212, 160, 86, 0.45);">
+          <div class="card-header">
+            <span class="badge badge-amber">6-Stage Fiduciary Orchestration</span>
+            <span class="badge badge-green">comparison_digest Signed · 0% Ad Bias</span>
+          </div>
+          <p id="orch-summary" style="font-size: 13px; line-height: 1.55;"></p>
+          <div class="stage-list" id="stage-list"></div>
+        </div>
+        <h4 style="font-size: 13px; color: var(--nuan-hupo-light); margin: 12px 0 8px;">📋 Actionable Orchestration Cards (张罗卡片 · Click to Execute PayPal Fiduciary Checkout)</h4>
+        <div id="orch-cards"></div>
+      </div>
+
+      <!-- TAB 2: 起居簿 Household (粮仓 · 家当 · 待客备忘 · 人情礼单) -->
+      <div id="tab-ledger" class="tab-pane" style="display:none;">
+        <div class="card-header" style="margin-bottom: 10px;">
+          <div>
+            <strong style="color:var(--nuan-hupo-light); font-size:14px;">起居簿 4 Pillars: 粮仓 (Granary) · 家当 (Inventory) · 待客 (Guests) · 礼单 (Gift Reciprocity)</strong>
+            <div style="font-size:12px; color:var(--moonstone);">Supports 12-Second Camera Video Sweep (`750ms` keyframe diff ≥ 0.035) & Kinship Invitation Code (`接头令`)</div>
+          </div>
+          <button class="amber-btn" onclick="triggerVideoSweep()">🎥 Run 12s Video Sweep Intake</button>
+        </div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 8px 0 6px;">🌾 1. 岁时粮仓 (HouseholdGranary · Expiry & Recipe Pairing)</h4>
+        <div id="granary-list"></div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 10px 0 6px;">📦 2. 空间家当 (HomeInventory · Video Sweep & Duplicate-Purchase Guard)</h4>
+        <div id="ledger-list"></div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 10px 0 6px;">🍵 3. 待客备忘与人情礼单 (Guest Dietary Redlines & Seasonal Gift Ledger)</h4>
+        <div id="guests-gifts-list"></div>
+      </div>
+
+      <!-- TAB 3: 风物志 Solar Terroir -->
+      <div id="tab-terroir" class="tab-pane" style="display:none;">
+        <div style="margin-bottom: 10px; font-size: 12.5px; color: var(--frost-white-dim);">
+          <strong>768-Dim Semantic Vector + PostGIS Spatial-Temporal Tile (`/api/v1/terroir/hybrid-search`)</strong>: National GI Goods · Heritage Shops · Classic Recipes · Rural Markets (`AAA` Anti-Noise Purity).
+        </div>
+        <div id="terroir-list"></div>
+      </div>
+
+      <!-- TAB 4: 自留地 Sovereign Memory & Force-Directed Taste Star Graph -->
+      <div id="tab-memory" class="tab-pane" style="display:none;">
+        <div class="card" style="border-color: var(--nuan-hupo);">
+          <div class="card-header">
+            <span class="card-title">✨ 力导向品味星图 (Force-Directed Taste Star Graph · `useForceLayout`)</span>
+            <span class="badge badge-amber">OpenViking Synced</span>
+          </div>
+          <div id="taste-graph-box" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+        </div>
+        <div id="memory-list"></div>
+        <div class="card" style="border-color: var(--yuanshan-dai);">
+          <div class="card-title" style="margin-bottom: 4px;">🌟 我的发现 ➔ 平台发现池 (Opt-In Anonymized Proof-of-Taste)</div>
+          <div class="omni-box" style="margin-top: 8px;">
+            <input id="pot-input" class="omni-input" value="28-year single-hearth wild mushroom noodle shop at foot of Yushan Mountain, Changshu (No branches)" />
+            <button class="amber-btn" onclick="submitProofOfTaste()">Anonymize & Share Discovery</button>
+          </div>
+          <div id="pot-list"></div>
+        </div>
+      </div>
+
+      <div id="action-toast" class="toast"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="card-header">
+        <div>
+          <h3 style="font-size: 14.5px; color: var(--nuan-hupo-light);">🔌 Live Sponsor & iOS Native Telemetry</h3>
+          <p style="font-size: 11.5px; color: var(--moonstone);">Qloo Taste AI · PayPal Sandbox v2 · Nebius NVIDIA Nemotron · Tavily · iOS Swift Bridge</p>
+        </div>
+        <span class="badge badge-green" id="active-mode-badge">MODE: ALL</span>
+      </div>
+
+      <div class="card" style="margin-top: 8px;">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">📱 iOS Native Swift Plugins (`deer-flow/mobile/ios`)</span>
+          <span class="badge badge-green">5 Active</span>
+        </div>
+        <div id="ios-plugins-box" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">🎨 Qloo Cultural Taste Graph × Taste Star Graph</span>
+          <span class="badge badge-amber">Affinity: 0.96</span>
+        </div>
+        <div id="qloo-summary" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">💳 PayPal Agentic Commerce Receipts</span>
+          <span class="badge badge-green">Ledger Guard</span>
+        </div>
+        <div id="paypal-orders" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;">
+          Click <strong>"Authorize PayPal Fiduciary Order"</strong> on any card to capture order, fulfill Old Chen's return gift, or save $19.50 via duplicate guard.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">⚡ Nebius Token Factory (NVIDIA) + Tavily Verifier</span>
+          <span class="badge badge-amber">Nemotron-70B</span>
+        </div>
+        <div id="nebius-summary" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <pre class="telemetry-box" id="raw-telemetry">Loading state...</pre>
+    </aside>
+  </main>
+
+  <script>
+    let STATE = null;
+    let LANG = 'en';
+    let TRACK_MODE = 'all';
+
+    function showToast(msg) {
+      const el = document.getElementById('action-toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 5500);
+    }
+
+    function toggleLang() { LANG = LANG === 'en' ? 'zh' : 'en'; renderAll(); }
+
+    function setTrackMode(mode, btn) {
+      TRACK_MODE = mode;
+      document.querySelectorAll('.controls-row .pill-btn').forEach(b => { if (b.id !== 'lang-btn') b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('active-mode-badge').textContent = 'MODE: ' + mode.toUpperCase();
+      renderAll();
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+      document.getElementById('tab-' + tabId).style.display = 'block';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function loadInitialState() {
+      const res = await fetch('/api/state');
+      STATE = await res.json();
+      renderAll();
+    }
+
+    async function runOrchestrate() {
+      const query = document.getElementById('omni-input').value;
+      const res = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query, scenario: TRACK_MODE})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.latest_orchestration = data.latest_orchestration;
+        STATE.household_ledger = data.household_ledger;
+        renderAll();
+        showToast('✓ 6-Stage Orchestration completed across Granary, Inventory, Guest Redlines, Gift Ledger & Qloo Taste AI.');
+      }
+    }
+
+    async function triggerVideoSweep() {
+      const res = await fetch('/api/video-sweep', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({room_name: 'North Balcony Storage & Dining Sideboard'})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.household_ledger = data.household_ledger;
+        STATE.video_sweep_runs = data.video_sweep_runs;
+        renderAll();
+        showToast(`🎥 12s Video Sweep (${data.sweep.sweep_id}) extracted 2 keyframes (diff >= 0.035) and batch-added Dyson V12 & Suzhou Winter Wine into 起居簿·家当!`);
+      }
+    }
+
+    async function triggerPayPalCheckout(itemId) {
+      const res = await fetch('/api/paypal-checkout', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({item_id: itemId, quantity: 1})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.orders = data.orders;
+        STATE.household_ledger = data.household_ledger;
+        STATE.gift_records = data.gift_records;
+        renderAll();
+        const r = data.receipt;
+        showToast(`💳 PayPal Order ${r.paypal_order_id} Captured ($${r.total_charged_usd})! Saved $${r.fiduciary_savings_usd} & synced to 起居簿.`);
+      }
+    }
+
+    async function updateConsent(memoryId, action) {
+      const res = await fetch('/api/memory-consent', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({memory_id: memoryId, action})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.memories = data.memories;
+        renderAll();
+        showToast(`🔒 OpenViking Memory (${memoryId}) updated to: ${action.toUpperCase()}`);
+      }
+    }
+
+    async function submitProofOfTaste() {
+      const note = document.getElementById('pot-input').value;
+      const res = await fetch('/api/proof-of-taste', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({note, city: 'Changshu, Suzhou'})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.attestations = data.attestations;
+        renderAll();
+        showToast(`🌟 Proof-of-Taste Attestation Minted: ${data.attestation.attestation_id}`);
+      }
+    }
+
+    function renderAll() {
+      if (!STATE) return;
+      const orch = STATE.latest_orchestration;
+      const st = STATE.solar_term;
+
+      document.getElementById('solar-title').textContent = LANG === 'en'
+        ? `24 SOLAR TERMS · ${st.name_en} (${st.date_window})`
+        : `二十四节气物候 · ${st.name_zh}（${st.date_window}）`;
+      document.getElementById('solar-desc').textContent = LANG === 'en' ? st.phenology_note_en : st.phenology_note_zh;
+      document.getElementById('orch-summary').textContent = LANG === 'en' ? orch.summary_en : orch.summary_zh;
+
+      document.getElementById('stage-list').innerHTML = orch.six_stage_chain.map(s => `
+        <div class="stage-item"><strong>${s.stage}</strong><span>${s.detail}</span></div>
+      `).join('');
+
+      const renderCards = (items) => items.map(item => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="badge badge-green">${LANG === 'en' ? item.type_label_en : item.type_label_zh}</span>
+              <span class="badge badge-amber" style="margin-left:6px;">Purity: ${item.purity_grade} (${(item.anti_noise_score * 100).toFixed(0)}%)</span>
+            </div>
+            <strong style="color: var(--nuan-hupo-light); font-size: 15px;">$${item.price_usd.toFixed(2)} <span style="font-size:11px;color:var(--moonstone);">(¥${item.price_cny})</span></strong>
+          </div>
+          <div class="card-title">${LANG === 'en' ? item.title_en : item.title_zh}</div>
+          <div class="card-meta">📍 ${LANG === 'en' ? item.provenance_en : item.provenance_zh} · 📜 ${item.standard_code}</div>
+          <div class="anti-noise-box">🛡️ ${LANG === 'en' ? item.anti_noise_note_en : item.anti_noise_note_zh}</div>
+          <div class="card-actions">
+            <span style="font-size: 11px; color: var(--moonstone);">Qloo Tags: ${item.qloo_tags.join(', ')} · ${item.commission_disclosure}</span>
+            <button class="amber-btn" onclick="triggerPayPalCheckout('${item.id}')">
+              💳 ${LANG === 'en' ? 'Authorize PayPal Fiduciary Order' : '授权 PayPal 受托下单并同步起居簿'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('orch-cards').innerHTML = renderCards(orch.orchestration_cards);
+      document.getElementById('terroir-list').innerHTML = renderCards(STATE.terroir_assets);
+
+      document.getElementById('granary-list').innerHTML = (STATE.granary_items || []).map(g => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${g.category}</span>
+            <span class="badge badge-amber">Status: ${g.status.toUpperCase()} · Best Before: ${g.bestBefore}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? g.name_en : g.name_zh} (${g.quantity})</div>
+          <div class="card-meta">📍 ${LANG === 'en' ? g.storageLocation_en : g.storageLocation_zh} · Origin: ${g.seasonalOrigin}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? g.notes_en : g.notes_zh}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('ledger-list').innerHTML = STATE.household_ledger.map(h => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${h.category}</span>
+            <span class="badge badge-amber">Confidence: ${(h.confidence * 100).toFixed(0)}% · ${h.status}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? h.item_en : h.item_zh}</div>
+          <div class="card-meta">📦 Path: <strong>${LANG === 'en' ? h.location_en : h.location_zh}</strong> · ${h.owner_scope}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? h.evidence_en : h.evidence_zh}</div>
+        </div>
+      `).join('');
+
+      const guestsHtml = (STATE.guest_notes || []).map(gn => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">待客备忘 Guest Hospitality</span>
+            <span class="badge badge-amber">${(LANG === 'en' ? gn.dietaryRestrictions_en : gn.dietaryRestrictions_zh).join(' | ')}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? gn.guestName_en : gn.guestName_zh}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? gn.notes_en : gn.notes_zh}</div>
+        </div>
+      `).join('');
+
+      const giftsHtml = (STATE.gift_records || []).map(gr => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-amber">人情礼单 Gift Reciprocity (${gr.status})</span>
+            <span class="badge badge-green">${LANG === 'en' ? gr.occasion_en : gr.occasion_zh}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? gr.counterparty_en : gr.counterparty_zh} · ${LANG === 'en' ? gr.giftItem_en : gr.giftItem_zh}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? gr.returnPlan_en : gr.returnPlan_zh}</div>
+        </div>
+      `).join('');
+      document.getElementById('guests-gifts-list').innerHTML = guestsHtml + giftsHtml;
+
+      document.getElementById('taste-graph-box').innerHTML = (STATE.taste_graph_nodes || []).map(n => `
+        <span class="badge ${n.type === 'user' ? 'badge-amber' : 'badge-green'}" style="padding:6px 10px;">
+          ${LANG === 'en' ? n.label_en : n.label_zh} (${(n.weight * 100).toFixed(0)}%)
+        </span>
+      `).join('');
+
+      document.getElementById('memory-list').innerHTML = STATE.memories.map(m => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${m.category}</span>
+            <span class="badge badge-amber">${m.status} · ${m.consent_id}</span>
+          </div>
+          <div class="card-title" style="font-size:13.5px;">${LANG === 'en' ? m.statement_en : m.statement_zh}</div>
+          <div class="card-meta">${LANG === 'en' ? m.source_en : m.source_zh}</div>
+          <div class="card-actions">
+            <button class="pill-btn" onclick="updateConsent('${m.id}', 'confirm')">✓ Confirm into OpenViking Profile</button>
+            <button class="pill-btn" onclick="updateConsent('${m.id}', 'revoke')">✕ Revoke & Purge Memory</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('pot-list').innerHTML = (STATE.attestations || []).map(a => `
+        <div style="margin-top:8px; padding:8px; background:#141418; border-radius:8px; font-size:12px;">
+          <strong style="color:var(--nuan-hupo-light);">${a.attestation_id}</strong> (${a.purity_grade}) · ${a.city}<br/>
+          <span>${a.note}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('ios-plugins-box').innerHTML = (STATE.ios_plugins || []).map(p => `
+        <div style="margin-bottom:4px;">• <code>${p.plugin}</code>: ${LANG === 'en' ? p.capability_en : p.capability_zh}</div>
+      `).join('');
+
+      const qloo = orch.sponsor_telemetry.qloo;
+      document.getElementById('qloo-summary').innerHTML = qloo.cultural_taste_clusters.map(c =>
+        `<div>• <strong>${LANG === 'en' ? c.name_en : c.name_zh}</strong> (${c.affinity_score})<br/>  ${c.cross_domain_correlations.join(' · ')}</div>`
+      ).join('') + `<div style="margin-top:4px;color:#8FD4BE;">✓ ${qloo.ad_noise_rejection_rate}</div>`;
+
+      const neb = orch.sponsor_telemetry.nebius_nvidia_tavily;
+      document.getElementById('nebius-summary').innerHTML = `
+        <div>• Model: <code>${neb.model_id}</code> (${neb.total_pipeline_latency_ms}ms)</div>
+        <div>• Vision: <code>${neb.video_sweep_vision}</code></div>
+        <div style="margin-top:4px;">• <strong>Tavily Verified:</strong><br/>${neb.tavily_search_verifier.verified_facts.map(f => '  ✓ ' + f).join('<br/>')}</div>
+      `;
+
+      if (STATE.orders && STATE.orders.length > 0) {
+        document.getElementById('paypal-orders').innerHTML = STATE.orders.map(o => `
+          <div style="padding:5px 0; border-bottom:1px solid var(--glass-border);">
+            <strong style="color:#8FD4BE;">${o.paypal_order_id}</strong> · <strong>$${o.total_charged_usd.toFixed(2)}</strong>
+            (Saved <strong>$${o.fiduciary_savings_usd.toFixed(2)}</strong>)<br/>
+            <span style="color:var(--nuan-hupo-light);">✓ ${o.fiduciary_audit.post_purchase_ledger_sync}</span>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('raw-telemetry').textContent = JSON.stringify({
+        active_track_mode: TRACK_MODE,
+        qloo_taste_graph: qloo,
+        nebius_nvidia_tavily: neb,
+        video_sweep_runs: STATE.video_sweep_runs.slice(0, 1),
+        latest_paypal_orders: STATE.orders.slice(0, 2),
+      }, null, 2);
+    }
+
+    loadInitialState();
+  </script>
+</body>
+</html>
