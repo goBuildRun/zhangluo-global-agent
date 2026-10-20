@@ -3,6 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![Architecture: OpenViking Memory](https://img.shields.io/badge/Memory-OpenViking%20Auditable-5B8C7A)](#architecture)
 [![Integrations: Qloo | Nebius NVIDIA | PayPal Sandbox | Tavily](https://img.shields.io/badge/Integrations-Qloo%20%7C%20Nebius%20NVIDIA%20%7C%20PayPal%20%7C%20Tavily-D4A056)](#sponsor-integrations)
+[![Demo Video: YouTube 1080p](https://img.shields.io/badge/🎥%20Watch%20Demo%20Video-YouTube%201080p-red)](https://youtu.be/1wwW4HmMAUA)
+
+> 🎬 **Watch the 1m48s 1080p English-Narrated Demo Video**: **[https://youtu.be/1wwW4HmMAUA](https://youtu.be/1wwW4HmMAUA)**
 
 > **顺时而动，不时不食；知你所念，莼鲈在心；去伪存真，不逐热榜；懂味之后，替你张罗。**  
 > *"Move with the season; remember what matters at home; filter out paid ad noise; orchestrate with fiduciary trust."*
