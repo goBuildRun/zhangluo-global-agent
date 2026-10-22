@@ -316,7 +316,12 @@ INITIAL_SOVEREIGN_MEMORIES: List[Dict[str, Any]] = [
 class QlooTasteAdapter:
     def __init__(self, api_key: Optional[str] = None) -> None:
         self.api_key = api_key or os.environ.get("QLOO_API_KEY", "").strip()
-        self.base_url = os.environ.get("QLOO_BASE_URL", "https://hackathon.api.qloo.com/v2")
+        raw_base = (
+            os.environ.get("QLOO_BASE_URL")
+            or os.environ.get("QLOO_TRUSTED_BASE_URL")
+            or "https://hackathon.api.qloo.com"
+        ).rstrip("/")
+        self.base_url = raw_base if raw_base.endswith("/v2") else f"{raw_base}/v2"
 
     def enrich_with_taste_graph(self, query: str, user_taste_tags: List[str]) -> Dict[str, Any]:
         t0 = time.time()

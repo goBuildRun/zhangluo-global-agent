@@ -55,6 +55,8 @@ python3 server.py --port 8765
 ### Optional Environment Variables for Live API Calls
 ```bash
 export QLOO_API_KEY="your_qloo_api_key"
+export QLOO_BASE_URL="https://hackathon.api.qloo.com"          # Compatible with @qloo/qloo-harness starter kit
+export QLOO_TRUSTED_BASE_URL="https://hackathon.api.qloo.com"  # Compatible with @qloo/qloo-harness starter kit
 export NEBIUS_API_KEY="your_nebius_token_factory_key"
 export TAVILY_API_KEY="your_tavily_api_key"
 export PAYPAL_CLIENT_ID="your_paypal_sandbox_client_id"
