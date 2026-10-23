@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小張羅 Zhangluo — Fiduciary Household & Taste Orchestration Agent</title>
+  <style>
+    :root {
+      --deep-charcoal: #1A1A1E;
+      --deep-charcoal-light: #242428;
+      --yuanshan-dai: #5B8C7A;
+      --yuanshan-dai-light: #6FA08E;
+      --nuan-hupo: #D4A056;
+      --nuan-hupo-light: #E0B470;
+      --frost-white: #F2F0EB;
+      --frost-white-dim: #D4D2CD;
+      --moonstone: #8A8A8F;
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", sans-serif;
+      background: radial-gradient(circle at top right, rgba(91, 140, 122, 0.16), transparent 45%), var(--deep-charcoal);
+      color: var(--frost-white);
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+    .topbar {
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(26, 26, 30, 0.92);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand-row { display: flex; align-items: center; gap: 14px; }
+    .seal-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--nuan-hupo);
+      background: radial-gradient(circle, rgba(91, 140, 122, 0.28), rgba(26, 26, 30, 0.95));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "Songti SC", "Noto Serif SC", serif;
+      color: var(--nuan-hupo);
+      line-height: 1.05;
+      box-shadow: 0 0 14px rgba(212, 160, 86, 0.22);
+      flex-shrink: 0;
+    }
+    .seal-logo .top-char { font-size: 12px; font-weight: 700; }
+    .seal-logo .bot-chars { font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+    .brand-title { font-size: 17px; font-weight: 700; }
+    .brand-sub { font-size: 11.5px; color: var(--moonstone); }
+    .controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill-btn {
+      background: var(--deep-charcoal-light);
+      color: var(--frost-white-dim);
+      border: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn.active, .pill-btn:hover {
+      border-color: var(--nuan-hupo);
+      color: var(--nuan-hupo-light);
+      background: rgba(212, 160, 86, 0.12);
+    }
+    .container {
+      max-width: 1240px;
+      margin: 18px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1.4fr 0.85fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) { .container { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--deep-charcoal-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .solar-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(91, 140, 122, 0.22), rgba(212, 160, 86, 0.12));
+      border: 1px solid rgba(91, 140, 122, 0.35);
+      margin-bottom: 14px;
+    }
+    .solar-tag { font-size: 12px; font-weight: 700; color: var(--nuan-hupo-light); }
+    .solar-desc { font-size: 12.5px; color: var(--frost-white-dim); margin-top: 4px; }
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      padding: 10px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--deep-charcoal);
+      color: var(--frost-white-dim);
+      cursor: pointer;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      background: rgba(91, 140, 122, 0.22);
+      border-color: var(--yuanshan-dai);
+      color: var(--frost-white);
+    }
+    .tab-btn span { display: block; font-size: 10.5px; color: var(--moonstone); font-weight: 400; margin-top: 2px; }
+    .omni-box { display: flex; gap: 8px; margin-bottom: 10px; }
+    .omni-input {
+      flex: 1;
+      background: var(--deep-charcoal);
+      border: 1px solid rgba(91, 140, 122, 0.45);
+      color: var(--frost-white);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+    }
+    .primary-btn {
+      background: var(--yuanshan-dai);
+      color: #fff;
+      border: none;
+      padding: 0 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .amber-btn {
+      background: var(--nuan-hupo);
+      color: #1A1A1E;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .card {
+      background: var(--deep-charcoal);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: rgba(91, 140, 122, 0.22); color: #8FD4BE; border: 1px solid rgba(91, 140, 122, 0.4); }
+    .badge-amber { background: rgba(212, 160, 86, 0.18); color: var(--nuan-hupo-light); border: 1px solid rgba(212, 160, 86, 0.4); }
+    .card-title { font-size: 14.5px; font-weight: 700; color: var(--frost-white); }
+    .card-meta { font-size: 12px; color: var(--moonstone); margin: 4px 0 8px; }
+    .anti-noise-box {
+      background: rgba(91, 140, 122, 0.1);
+      border-left: 3px solid var(--yuanshan-dai);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--frost-white-dim);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+    }
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .stage-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
+    .stage-item {
+      background: var(--deep-charcoal);
+      border: 1px solid var(--glass-border);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .stage-item strong { color: var(--nuan-hupo-light); display: block; margin-bottom: 2px; }
+    .telemetry-box {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      background: #121215;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px;
+      color: #9FE6CF;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .toast {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(91, 140, 122, 0.28);
+      border: 1px solid var(--yuanshan-dai);
+      font-size: 12.5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-row">
+      <div class="seal-logo" title="小張羅 Circular Seal">
+        <span class="top-char">小</span>
+        <span class="bot-chars">張羅</span>
+      </div>
+      <div>
+        <div class="brand-title">Zhangluo (小張羅) · iOS & Multi-Modal Fiduciary Household Agent</div>
+        <div class="brand-sub">12s Video Sweep · 4-Pillar Household Ledger (粮仓/家当/待客礼单/维保) · 2,843-County AAA Terroir · OpenViking Memory</div>
+      </div>
+    </div>
+    <div class="controls-row">
+      <button class="pill-btn active" onclick="setTrackMode('all', this)">🏆 Full Matrix</button>
+      <button class="pill-btn" onclick="setTrackMode('qloo', this)">🎨 Qloo Taste AI ($50k)</button>
+      <button class="pill-btn" onclick="setTrackMode('paypal', this)">💳 PayPal Agentic Commerce ($67.5k)</button>
+      <button class="pill-btn" onclick="setTrackMode('nebius', this)">⚡ Nebius × NVIDIA + Tavily ($53k)</button>
+      <button class="pill-btn active" id="lang-btn" onclick="toggleLang()">🌐 EN / 中文</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="solar-banner">
+        <div>
+          <div class="solar-tag" id="solar-title">24 SOLAR TERMS · 霜降 FROST'S DESCENT</div>
+          <div class="solar-desc" id="solar-desc"></div>
+        </div>
+        <span class="badge badge-amber">iOS ShareExtension + EventKit</span>
+      </div>
+
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab('orchestrate', this)">
+          找张罗 Orchestrate
+          <span>Omni-Input & Cards</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('ledger', this)">
+          起居簿 Household
+          <span>粮仓·家当·待客·礼单</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('terroir', this)">
+          风物志 Solar Terroir
+          <span>Qloo × AAA Anti-Noise</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('memory', this)">
+          自留地 Sovereign
+          <span>Taste Star Graph & Consent</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: 找张罗 Orchestrate -->
+      <div id="tab-orchestrate" class="tab-pane">
+        <div class="omni-box">
+          <input id="omni-input" class="omni-input" value="Frost's Descent: check winter duvet & storage boxes, plan gout-safe dinner for Mr. Wang with expiring granary bamboo shoots, and prepare return gift for Old Chen." />
+          <button class="primary-btn" onclick="runOrchestrate()">张罗 Orchestrate</button>
+        </div>
+        <div class="card" style="border-color: rgba(212, 160, 86, 0.45);">
+          <div class="card-header">
+            <span class="badge badge-amber">6-Stage Fiduciary Orchestration</span>
+            <span class="badge badge-green">comparison_digest Signed · 0% Ad Bias</span>
+          </div>
+          <p id="orch-summary" style="font-size: 13px; line-height: 1.55;"></p>
+          <div class="stage-list" id="stage-list"></div>
+        </div>
+        <h4 style="font-size: 13px; color: var(--nuan-hupo-light); margin: 12px 0 8px;">📋 Actionable Orchestration Cards (张罗卡片 · Click to Execute PayPal Fiduciary Checkout)</h4>
+        <div id="orch-cards"></div>
+      </div>
+
+      <!-- TAB 2: 起居簿 Household (粮仓 · 家当 · 待客备忘 · 人情礼单) -->
+      <div id="tab-ledger" class="tab-pane" style="display:none;">
+        <div class="card-header" style="margin-bottom: 10px;">
+          <div>
+            <strong style="color:var(--nuan-hupo-light); font-size:14px;">起居簿 4 Pillars: 粮仓 (Granary) · 家当 (Inventory) · 待客 (Guests) · 礼单 (Gift Reciprocity)</strong>
+            <div style="font-size:12px; color:var(--moonstone);">Supports 12-Second Camera Video Sweep (`750ms` keyframe diff ≥ 0.035) & Kinship Invitation Code (`接头令`)</div>
+          </div>
+          <button class="amber-btn" onclick="triggerVideoSweep()">🎥 Run 12s Video Sweep Intake</button>
+        </div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 8px 0 6px;">🌾 1. 岁时粮仓 (HouseholdGranary · Expiry & Recipe Pairing)</h4>
+        <div id="granary-list"></div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 10px 0 6px;">📦 2. 空间家当 (HomeInventory · Video Sweep & Duplicate-Purchase Guard)</h4>
+        <div id="ledger-list"></div>
+        <h4 style="font-size:12.5px; color:#8FD4BE; margin: 10px 0 6px;">🍵 3. 待客备忘与人情礼单 (Guest Dietary Redlines & Seasonal Gift Ledger)</h4>
+        <div id="guests-gifts-list"></div>
+      </div>
+
+      <!-- TAB 3: 风物志 Solar Terroir -->
+      <div id="tab-terroir" class="tab-pane" style="display:none;">
+        <div style="margin-bottom: 10px; font-size: 12.5px; color: var(--frost-white-dim);">
+          <strong>768-Dim Semantic Vector + PostGIS Spatial-Temporal Tile (`/api/v1/terroir/hybrid-search`)</strong>: National GI Goods · Heritage Shops · Classic Recipes · Rural Markets (`AAA` Anti-Noise Purity).
+        </div>
+        <div id="terroir-list"></div>
+      </div>
+
+      <!-- TAB 4: 自留地 Sovereign Memory & Force-Directed Taste Star Graph -->
+      <div id="tab-memory" class="tab-pane" style="display:none;">
+        <div class="card" style="border-color: var(--nuan-hupo);">
+          <div class="card-header">
+            <span class="card-title">✨ 力导向品味星图 (Force-Directed Taste Star Graph · `useForceLayout`)</span>
+            <span class="badge badge-amber">OpenViking Synced</span>
+          </div>
+          <div id="taste-graph-box" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+        </div>
+        <div id="memory-list"></div>
+        <div class="card" style="border-color: var(--yuanshan-dai);">
+          <div class="card-title" style="margin-bottom: 4px;">🌟 我的发现 ➔ 平台发现池 (Opt-In Anonymized Proof-of-Taste)</div>
+          <div class="omni-box" style="margin-top: 8px;">
+            <input id="pot-input" class="omni-input" value="28-year single-hearth wild mushroom noodle shop at foot of Yushan Mountain, Changshu (No branches)" />
+            <button class="amber-btn" onclick="submitProofOfTaste()">Anonymize & Share Discovery</button>
+          </div>
+          <div id="pot-list"></div>
+        </div>
+      </div>
+
+      <div id="action-toast" class="toast"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="card-header">
+        <div>
+          <h3 style="font-size: 14.5px; color: var(--nuan-hupo-light);">🔌 Live Sponsor & iOS Native Telemetry</h3>
+          <p style="font-size: 11.5px; color: var(--moonstone);">Qloo Taste AI · PayPal Sandbox v2 · Nebius NVIDIA Nemotron · Tavily · iOS Swift Bridge</p>
+        </div>
+        <span class="badge badge-green" id="active-mode-badge">MODE: ALL</span>
+      </div>
+
+      <div class="card" style="margin-top: 8px;">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">📱 iOS Native Swift Plugins (`deer-flow/mobile/ios`)</span>
+          <span class="badge badge-green">5 Active</span>
+        </div>
+        <div id="ios-plugins-box" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">🎨 Qloo Cultural Taste Graph × Taste Star Graph</span>
+          <span class="badge badge-amber">Affinity: 0.96</span>
+        </div>
+        <div id="qloo-summary" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">💳 PayPal Agentic Commerce Receipts</span>
+          <span class="badge badge-green">Ledger Guard</span>
+        </div>
+        <div id="paypal-orders" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;">
+          Click <strong>"Authorize PayPal Fiduciary Order"</strong> on any card to capture order, fulfill Old Chen's return gift, or save $19.50 via duplicate guard.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" style="font-size: 12.5px;">⚡ Nebius Token Factory (NVIDIA) + Tavily Verifier</span>
+          <span class="badge badge-amber">Nemotron-70B</span>
+        </div>
+        <div id="nebius-summary" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;"></div>
+      </div>
+
+      <pre class="telemetry-box" id="raw-telemetry">Loading state...</pre>
+    </aside>
+  </main>
+
+  <script>
+    // --- STATIC GITHUB PAGES FALLBACK START ---
+    const STATIC_MOCKS = {"/api/state": {"ok": true, "solar_term": {"code": "shuangjiang", "name_zh": "霜降 · 初候豺乃祭兽", "name_en": "Frost's Descent (18th Solar Term · Pentad I)", "date_window": "Oct 23 – Nov 06", "city_zh": "上海 / 苏州 · 江南物候圈", "city_en": "Shanghai & Suzhou · Jiangnan Phenology Zone", "phenology_note_zh": "气肃而凝，露结为霜。宜消纳粮仓临期山珍、筹备待客秋宴、回赠中秋人情礼单、环扫收纳换季家当。", "phenology_note_en": "Late autumn frost approaches. Optimal window to cook expiring pantry mountain delicacies, host gout-safe autumn dinners, fulfill pending return gifts, and video-sweep seasonal closet inventory."}, "ios_plugins": [{"plugin": "ShareExtension + ShareIntakePlugin.swift", "capability_zh": "iOS 系统级跨应用分享（微信/小红书/淘宝一键导入 zhangluo://share-intake）", "capability_en": "iOS System Share Sheet Extension (Cross-app intake from WeChat/Taobao/Safari via App Group)", "status": "ACTIVE"}, {"plugin": "VoiceDictationPlugin.swift", "capability_zh": "Apple SFSpeechRecognizer + AVAudioEngine 原生低延迟流式语音听写", "capability_en": "Native SFSpeechRecognizer + AVAudioEngine real-time streaming dictation (partial/final)", "status": "ACTIVE"}, {"plugin": "ReminderCalendarPlugin.swift", "capability_zh": "iOS 17+ EventKit 原生系统提醒事项与日历写入（内置手机号/邮箱隐私脱敏）", "capability_en": "iOS 17+ EventKit Reminders & Calendar write-back with regex PII masking", "status": "ACTIVE"}, {"plugin": "VideoSweepRecorder (750ms Keyframe Diff >= 0.035)", "capability_zh": "12 秒视频环扫识屋：实时帧差提取关键帧 + 多模态批量识别空间家当入库", "capability_en": "12-Sec Camera Video Sweep: Real-time 750ms pixel-diff keyframe extraction & batch spatial inventory", "status": "ACTIVE"}], "granary_items": [{"id": "granary_bianjian_01", "name_zh": "天目山野生扁尖笋干", "name_en": "Tianmu Mountain Wild Sun-Dried Bamboo Shoots", "category": "山野干货 / Mountain Delicacy", "storageLocation_zh": "厨房二层原木抽屉 · 密封玻璃罐", "storageLocation_en": "Kitchen 2nd Wooden Drawer · Airtight Glass Jar", "quantity": "2 罐 (500g)", "bestBefore": "2026-10-28", "seasonalOrigin": "浙江临安天目山 (Lin'an, Zhejiang)", "status": "urgent", "notes_zh": "立夏新采晒干，最佳赏味窗口临近，建议霜降家宴与老鸭同炖消燥（低嘌呤需控汤）。", "notes_en": "Urgent tasting window! Ideal for braising with duck or bamboo-shoot soup this week."}, {"id": "granary_jizong_03", "name_zh": "滇西手工油浸野生鸡枞菌", "name_en": "West Yunnan Wild Termite Mushroom in Cold-Pressed Oil", "category": "山野菌菇 / Wild Fungi", "storageLocation_zh": "冰箱保鲜层左侧调味架", "storageLocation_en": "Fridge Crisper Tier · Left Condiment Rack", "quantity": "1 瓶 (350g)", "bestBefore": "2026-11-02", "seasonalOrigin": "云南楚雄南华 (Nanhua, Yunnan)", "status": "expiring_soon", "notes_zh": "开盖后宜尽快佐苏式白汤面或烹煮米线，香气浓郁纯正。", "notes_en": "Opened jar expiring soon; pair with Suzhou noodle broth or warm rice noodles."}, {"id": "granary_chenpi_04", "name_zh": "新会八年陈圈枝柑陈皮", "name_en": "8-Year Aged Xinhui Chaken Tangerine Peel", "category": "传统茶膳 / Aged Botanical", "storageLocation_zh": "书房储物博古架 · 麻袋防潮盒", "storageLocation_en": "Study Curio Shelf · Moisture-Proof Linen Box", "quantity": "85g (低于补仓线 / Low Stock)", "bestBefore": "2030-12-31", "seasonalOrigin": "广东江门新会茶坑村 (Xinhui, Guangdong)", "status": "fresh", "notes_zh": "干仓陈化，霜降季节煮老白茶或炖雪梨极佳，当前余量不足建议补仓。", "notes_en": "Dry-aged; ideal for Frost's Descent pear broth & white tea. Below 100g restock line."}], "household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}], "guest_notes": [{"id": "guest_wang_01", "guestName_zh": "小王（周末家宴主客）", "guestName_en": "Mr. Wang (Weekend Dinner Guest)", "flavorPreferences_zh": ["喜咸鲜清润", "爱喝清茶与银耳羹"], "flavorPreferences_en": ["Savory & light Jiangnan flavors", "Clear tea & tremella soup"], "dietaryRestrictions_zh": ["🚨 痛风忌高嘌呤（严禁海鲜浓汤、动物内脏）", "少饮烈酒"], "dietaryRestrictions_en": ["🚨 Gout / Strictly Low-Purine (No seafood broth or organ meats)", "Low alcohol"], "notes_zh": "上次对苏造糟溜白鱼评价极高，可搭配粮仓临期『天目山扁尖笋干』做清炖素高汤。", "notes_en": "Loved steamed white fish last visit; pair with our expiring Tianmu bamboo shoots in clear broth."}, {"id": "guest_li_02", "guestName_zh": "老李（同窗好友）", "guestName_en": "Old Li (College Friend)", "flavorPreferences_zh": ["偏好江南苏锡微甜", "喜板栗与桂花糖藕"], "flavorPreferences_en": ["Subtle Suzhou sweet notes", "Chestnuts & osmanthus lotus root"], "dietaryRestrictions_zh": ["🚨 忌生葱生蒜（可用熟葱油）", "胃寒忌过度冰镇与生冷"], "dietaryRestrictions_en": ["🚨 No raw scallions/garlic (cooked scallion oil OK)", "No cold/iced dishes"], "notes_zh": "家宴常客，极喜桂花糖藕与温润陈皮茶。", "notes_en": "Loves osmanthus glutinous lotus root and warm Xinhui aged tangerine peel tea."}], "gift_records": [{"id": "gift_crab_02", "type": "received", "counterparty_zh": "老陈（大学同窗）", "counterparty_en": "Old Chen (University Classmate)", "occasion_zh": "中秋探访收礼 · 待霜降回礼", "occasion_en": "Received at Mid-Autumn · Pending Frost's Descent Return Gift", "giftItem_zh": "已收：阳澄湖生态大闸蟹礼卡（4公4母 · 约¥888）", "giftItem_en": "Received: Yangcheng Lake Hairy Crab Gift Card (8 crabs · ~$125)", "returnPlan_zh": "备忘回礼：霜降前后回赠『苏州东山古法桂花冬酿酒 + 新会梅江五年陈皮礼盒』", "returnPlan_en": "Return Gift Plan: Send 'Suzhou Osmanthus Winter Wine + Xinhui 5-Yr GI Aged Chenpi Gift Box' ($38.00)", "status": "completed_via_paypal"}], "terroir_assets": [{"id": "tr-good-001", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "好物 · 国家地标 (GI) · AAA去噪", "type_label_en": "Terroir Good · National GI · AAA Anti-Noise", "title_zh": "广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈）", "title_en": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "provenance_zh": "广东省江门市新会区 · 梅江塞口围微产区 (22.512°N, 113.048°E)", "provenance_en": "Meijiang Micro-Terroir, Xinhui, Guangdong (22.512°N, 113.048°E)", "standard_code": "GB/T 20560 国家地理标志 · 26年柑园直供 · 分店=1", "solar_terms": ["霜降 Frost's Descent", "立冬 Start of Winter"], "anti_noise_score": 0.96, "anti_noise_note_zh": "老饕 AAA 去噪判词：剔除 94.2% 电商染色催熟青皮与竞价热榜贴牌店；油室均匀透光，既补足书房粮仓余量，又可体面回赠老陈中秋蟹礼。", "anti_noise_note_en": "AAA Anti-Noise Verdict: Filtered out 94.2% paid-ad dyed peel listings. Serves both your low-stock Study Granary (85g left) and Old Chen's pending return gift.", "price_usd": 38.0, "price_cny": 268, "commission_disclosure": "comparison_digest Verified · 0% Ad Boost", "qloo_tags": ["artisanal-tea", "slow-food", "heritage-craft", "botanical-gift"]}, {"id": "tr-good-003", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "买得对 · 起居簿查重省钱卡", "type_label_en": "Fiduciary Buy · Duplicate-Guard Verified", "title_zh": "加厚食品级 PP 双卡扣防潮密封箱 65L（配硅胶发泡密封圈 · 仅补购1个）", "title_en": "Heavy-Duty 65L Silicone-Gasket Moisture-Proof Storage Box (Buy 1 Instead of 2)", "provenance_zh": "浙江台州黄岩 · 出口级模具直造工坊", "provenance_en": "Huangyan Precision Mold Workshop, Taizhou, Zhejiang", "standard_code": "GB 4806.7 食品接触级 PP · 尺寸匹配书房闲置箱 60×42×34cm", "solar_terms": ["寒露 Cold Dew", "霜降 Frost's Descent"], "anti_noise_score": 0.93, "anti_noise_note_zh": "起居簿联动省钱：12秒视频扫屋已确认书房榻榻米有 1 个闲置 65L 箱，自动将采购量从 2 个减为 1 个，立省 $19.50！", "anti_noise_note_en": "Household Ledger Guard: 12-sec Video Sweep confirmed 1 spare 65L box in Study Tatami—automatically reduced order from 2 to 1, saving you $19.50!", "price_usd": 19.5, "price_cny": 138, "commission_disclosure": "Saves $19.50 via Household Ledger · 0% Ad Bias", "qloo_tags": ["minimalist-home", "japanese-organization", "durable-craft"]}, {"id": "tr-recipe-002", "type": "RECIPE_DINNER", "purity_grade": "AAA", "type_label_zh": "今日家宴卡 · 粮仓消纳 × 待客忌口定制", "type_label_en": "Daily Dinner Card · Granary × Guest Redline Matched", "title_zh": "霜降待客定制席：天目山扁尖清炖手撕鸡 + 苏造糟溜白鱼 + 桂花糖藕（零高嘌呤/无生葱蒜）", "title_en": "Frost's Descent Custom Banquet: Tianmu Bamboo Shoot Clear Broth + Steamed White Fish + Osmanthus Lotus Root", "provenance_zh": "联动【起居簿·粮仓】临期扁尖笋干 + 【起居簿·待客】小王痛风忌口 & 老李忌生葱蒜", "provenance_en": "Cross-linked with Expiring Granary Bamboo Shoots + Mr. Wang's Gout Low-Purine & Old Li's No-Raw-Scallion Rules", "standard_code": "《随园食单》古法去噪 · 常熟虞山 28 年非连锁老店同源手艺", "solar_terms": ["霜降 Frost's Descent"], "anti_noise_score": 0.97, "anti_noise_note_zh": "零浪费、零失礼：1）优先消纳厨房将于 10月28日临期的天目山扁尖笋干；2）严格避开小王的痛风高嘌呤海鲜浓汤红线与老李的生葱蒜红线。", "anti_noise_note_en": "Zero Food Waste & Zero Hospitality Faux Pas: Uses your expiring Tianmu bamboo shoots while strictly respecting Mr. Wang's gout redline and Old Li's no-raw-scallion rule.", "price_usd": 24.0, "price_cny": 168, "commission_disclosure": "Fresh Ingredient Bundle · Fiduciary Recipe Card", "qloo_tags": ["jiangnan-cuisine", "low-purine-gourmet", "seasonal-banquet", "heritage-dining"]}], "taste_graph_nodes": [{"id": "node_user", "label_zh": "我 (户主)", "label_en": "Me (Household Owner)", "type": "user", "weight": 1.0}, {"id": "node_1", "label_zh": "新会老陈皮/老白茶", "label_en": "Aged Chenpi & White Tea", "type": "ingredient", "weight": 0.95}, {"id": "node_2", "label_zh": "天目山野笋/滇西菌子", "label_en": "Wild Bamboo & Yunnan Fungi", "type": "ingredient", "weight": 0.9}, {"id": "node_3", "label_zh": "十年非连锁老店 (AAA)", "label_en": "10-Yr Non-Chain Heritage Shops", "type": "scene", "weight": 0.96}, {"id": "node_4", "label_zh": "待客忌口与礼尚统筹", "label_en": "Guest Redlines & Gift Reciprocity", "type": "scene", "weight": 0.88}, {"id": "node_5", "label_zh": "拒绝竞价热榜与香精茶", "label_en": "Reject Paid Ads & Artificial Tea", "type": "redline", "weight": 0.98}], "memories": [{"id": "mem-001", "category": "Taste Graph / 知味偏好 (OpenViking)", "statement_zh": "偏爱干仓老陈皮、明前龙井与山野笋菌；反感香精调味茶与连锁预制菜", "statement_en": "Prefers dry-aged Chenpi, Lion Peak Longjing & wild mountain bamboo/fungi; rejects artificial teas & pre-made chain food", "status": "CONFIRMED", "consent_id": "ov-consent-8821a", "release_identity": "zl-ios-2026.10", "source_zh": "用户已手动确认写入长期画像（23:02:33）", "source_en": "Confirmed by user at 23:02:33 UTC (consent_id verified)"}, {"id": "mem-002", "category": "Hospitality & Gift Rule / 待客礼单契约", "statement_zh": "组局家宴自动核对【待客备忘】亲友忌口（如痛风低嘌呤、忌生葱蒜），节气前7天提醒【人情礼单】待回礼事项", "statement_en": "Always cross-check Guest Dietary Redlines (gout, allergies) when planning dinners & alert Pending Return Gifts 7 days before solar terms", "status": "CONFIRMED", "consent_id": "ov-consent-8829c", "release_identity": "zl-ios-2026.10", "source_zh": "家庭共享级规则 (household_shared)", "source_en": "Household-shared fiduciary rule"}, {"id": "mem-003", "category": "MemoryInbox Pending / 待确认候选记忆", "statement_zh": "候选推断：检测到您通过 12 秒视频环扫录入了次卧冬被与除湿机，是否在每年霜降前自动生成 iOS 日历除湿保养提醒？", "statement_en": "Candidate Inference: After your 12-sec Video Sweep of Guest Closet & Dehumidifier, auto-schedule an iOS EventKit Reminder every Frost's Descent?", "status": "PENDING_CONSENT", "consent_id": "ov-pending-9904x", "release_identity": "zl-ios-2026.10", "source_zh": "进入 MemoryInbox 待确认区 · 未经确认绝不改写正式画像", "source_en": "Held in MemoryInbox · Blocked until explicit user consent_id approval"}], "orders": [{"provider": "PayPal Developer Sandbox · Agentic Commerce v2", "paypal_order_id": "PAYPAL-SANDBOX-041DBCB542C7", "comparison_digest": "9176cced98549241112c56db27ff4ec6ceecc218d222d25233a8c6aa1db44232", "live_sandbox_authenticated": false, "status": "COMPLETED_AND_SYNCED_TO_HOUSEHOLD_LEDGER", "item_id": "tr-good-001", "item_title": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "quantity": 1, "total_charged_usd": 38.0, "fiduciary_savings_usd": 15.0, "fiduciary_audit": {"household_inventory_checked": true, "zero_ad_commission_bias": true, "post_purchase_ledger_sync": "Synced 'Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)' into Household Ledger (起居簿·家当/粮仓/礼单) & iOS EventKit."}, "timestamp": "2026-10-23T15:02:33Z"}], "attestations": [{"attestation_id": "PoT-0x67a55e0d49d8effb", "note": "Verified 26-year non-chain orchard in Xinhui.", "city": "Xinhui, Guangdong", "privacy_mode": "Default Private -> User Opt-in Anonymized & Geo-Verified (Revocable anytime)", "anti_noise_passed": true, "purity_grade": "AAA", "qloo_cluster": "qloo:taste:artisanal_heritage_terroir", "timestamp": "2026-10-23T15:02:33Z"}], "video_sweep_runs": [{"sweep_id": "SWEEP-1792767753", "room_name": "North Balcony Storage & Dining Sideboard", "duration_sec": 12, "sampling_interval_ms": 750, "diff_threshold": 0.035, "keyframes_extracted": [{"frame_index": 0, "timestamp_ms": 0, "diff_score": 1.0, "detected_item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "detected_item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "space_path_zh": "北阳台储物间 ➔ 立柜左格", "space_path_en": "North Balcony Storage ➔ Left Tall Cabinet", "confidence": 0.97}, {"frame_index": 1, "timestamp_ms": 1500, "diff_score": 0.068, "detected_item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "detected_item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "space_path_zh": "餐厅西厨柜 ➔ 下层酒格", "space_path_en": "Dining Sideboard ➔ Lower Wine Rack", "confidence": 0.96}], "timestamp": "2026-10-23T15:02:33Z"}], "latest_orchestration": {"scenario": "all", "query": "Frost's Descent orchestration: check winter duvet & storage boxes, plan low-purine dinner for Mr. Wang using expiring granary bamboo shoots, and prepare return gift for Old Chen.", "solar_term": {"code": "shuangjiang", "name_zh": "霜降 · 初候豺乃祭兽", "name_en": "Frost's Descent (18th Solar Term · Pentad I)", "date_window": "Oct 23 – Nov 06", "city_zh": "上海 / 苏州 · 江南物候圈", "city_en": "Shanghai & Suzhou · Jiangnan Phenology Zone", "phenology_note_zh": "气肃而凝，露结为霜。宜消纳粮仓临期山珍、筹备待客秋宴、回赠中秋人情礼单、环扫收纳换季家当。", "phenology_note_en": "Late autumn frost approaches. Optimal window to cook expiring pantry mountain delicacies, host gout-safe autumn dinners, fulfill pending return gifts, and video-sweep seasonal closet inventory."}, "six_stage_chain": [{"stage": "1. Know Who You Are", "detail": "Force-Directed Taste Star Graph + OpenViking consent_id rules"}, {"stage": "2. Judge Why Now", "detail": "Frost's Descent (18th Solar Term · Pentad I) + Granary expiry & Gift window"}, {"stage": "3. Ground in Cultural Taste", "detail": "Qloo Taste AI (0.96) × 768-dim Vector + PostGIS 2,843-County Tile"}, {"stage": "4. Filter Out Paid Ad Noise", "detail": "AAA Purity Radar: >=10-yr longevity, <=2 branches (94.2% ads rejected)"}, {"stage": "5. Fiduciary Action Card", "detail": "Signed comparison_digest + PayPal Sandbox v2 + iOS EventKit Reminder"}, {"stage": "6. Learn With Explicit Consent", "detail": "MemoryInbox pending queue (`ov-pending-9904x`) + revocable discovery"}], "summary_zh": "【小张罗全维统筹完毕】1）『起居簿·家当』核验：次卧冬被已就位；书房已有 1 个闲置 65L 密封箱，自动为您拦截重复购买省下 $19.50！2）『起居簿·粮仓 × 待客』联动：厨房天目山扁尖笋干将于 10月28日临期，结合周末主客小王的「痛风忌高嘌呤」与老李「忌生葱蒜」备忘，已生成零高嘌呤《霜降待客定制家宴卡》；3）『起居簿·礼单 × 风物志』：针对中秋老陈送的阳澄湖大闸蟹，已通过 Qloo 品味图谱与 AAA 老饕去噪匹配『新会梅江五年陈 GI 陈皮礼盒（$38）』，一盒兼顾书房粮仓补仓与体面回礼！", "summary_en": "[Full 4-Tab Household & Taste Orchestration Complete] 1) Household Inventory (`起居簿·家当`): Winter duvet located in Guest Closet Bag #2; found 1 spare 65L box in Study Tatami—intercepting duplicate purchase & saving you $19.50! 2) Granary × Guest Hospitality (`粮仓 × 待客`): Kitchen Tianmu bamboo shoots expire Oct 28; cross-checked Mr. Wang's Gout (strictly low-purine) & Old Li's no-raw-scallion rules to generate your custom Frost's Descent Dinner Card. 3) Gift Reciprocity × Qloo Taste AI (`礼单 × 风物志`): Matched 'Xinhui Meijiang 5-Yr GI Aged Chenpi ($38)' (AAA Purity, 94.2% ad noise filtered) to simultaneously restock your Study Granary and fulfill Old Chen's Mid-Autumn crab return gift!", "matched_household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}], "orchestration_cards": [{"id": "tr-good-001", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "好物 · 国家地标 (GI) · AAA去噪", "type_label_en": "Terroir Good · National GI · AAA Anti-Noise", "title_zh": "广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈）", "title_en": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "provenance_zh": "广东省江门市新会区 · 梅江塞口围微产区 (22.512°N, 113.048°E)", "provenance_en": "Meijiang Micro-Terroir, Xinhui, Guangdong (22.512°N, 113.048°E)", "standard_code": "GB/T 20560 国家地理标志 · 26年柑园直供 · 分店=1", "solar_terms": ["霜降 Frost's Descent", "立冬 Start of Winter"], "anti_noise_score": 0.96, "anti_noise_note_zh": "老饕 AAA 去噪判词：剔除 94.2% 电商染色催熟青皮与竞价热榜贴牌店；油室均匀透光，既补足书房粮仓余量，又可体面回赠老陈中秋蟹礼。", "anti_noise_note_en": "AAA Anti-Noise Verdict: Filtered out 94.2% paid-ad dyed peel listings. Serves both your low-stock Study Granary (85g left) and Old Chen's pending return gift.", "price_usd": 38.0, "price_cny": 268, "commission_disclosure": "comparison_digest Verified · 0% Ad Boost", "qloo_tags": ["artisanal-tea", "slow-food", "heritage-craft", "botanical-gift"]}, {"id": "tr-good-003", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "买得对 · 起居簿查重省钱卡", "type_label_en": "Fiduciary Buy · Duplicate-Guard Verified", "title_zh": "加厚食品级 PP 双卡扣防潮密封箱 65L（配硅胶发泡密封圈 · 仅补购1个）", "title_en": "Heavy-Duty 65L Silicone-Gasket Moisture-Proof Storage Box (Buy 1 Instead of 2)", "provenance_zh": "浙江台州黄岩 · 出口级模具直造工坊", "provenance_en": "Huangyan Precision Mold Workshop, Taizhou, Zhejiang", "standard_code": "GB 4806.7 食品接触级 PP · 尺寸匹配书房闲置箱 60×42×34cm", "solar_terms": ["寒露 Cold Dew", "霜降 Frost's Descent"], "anti_noise_score": 0.93, "anti_noise_note_zh": "起居簿联动省钱：12秒视频扫屋已确认书房榻榻米有 1 个闲置 65L 箱，自动将采购量从 2 个减为 1 个，立省 $19.50！", "anti_noise_note_en": "Household Ledger Guard: 12-sec Video Sweep confirmed 1 spare 65L box in Study Tatami—automatically reduced order from 2 to 1, saving you $19.50!", "price_usd": 19.5, "price_cny": 138, "commission_disclosure": "Saves $19.50 via Household Ledger · 0% Ad Bias", "qloo_tags": ["minimalist-home", "japanese-organization", "durable-craft"]}, {"id": "tr-recipe-002", "type": "RECIPE_DINNER", "purity_grade": "AAA", "type_label_zh": "今日家宴卡 · 粮仓消纳 × 待客忌口定制", "type_label_en": "Daily Dinner Card · Granary × Guest Redline Matched", "title_zh": "霜降待客定制席：天目山扁尖清炖手撕鸡 + 苏造糟溜白鱼 + 桂花糖藕（零高嘌呤/无生葱蒜）", "title_en": "Frost's Descent Custom Banquet: Tianmu Bamboo Shoot Clear Broth + Steamed White Fish + Osmanthus Lotus Root", "provenance_zh": "联动【起居簿·粮仓】临期扁尖笋干 + 【起居簿·待客】小王痛风忌口 & 老李忌生葱蒜", "provenance_en": "Cross-linked with Expiring Granary Bamboo Shoots + Mr. Wang's Gout Low-Purine & Old Li's No-Raw-Scallion Rules", "standard_code": "《随园食单》古法去噪 · 常熟虞山 28 年非连锁老店同源手艺", "solar_terms": ["霜降 Frost's Descent"], "anti_noise_score": 0.97, "anti_noise_note_zh": "零浪费、零失礼：1）优先消纳厨房将于 10月28日临期的天目山扁尖笋干；2）严格避开小王的痛风高嘌呤海鲜浓汤红线与老李的生葱蒜红线。", "anti_noise_note_en": "Zero Food Waste & Zero Hospitality Faux Pas: Uses your expiring Tianmu bamboo shoots while strictly respecting Mr. Wang's gout redline and Old Li's no-raw-scallion rule.", "price_usd": 24.0, "price_cny": 168, "commission_disclosure": "Fresh Ingredient Bundle · Fiduciary Recipe Card", "qloo_tags": ["jiangnan-cuisine", "low-purine-gourmet", "seasonal-banquet", "heritage-dining"]}], "sponsor_telemetry": {"qloo": {"provider": "Qloo Taste AI Graph v2 × Zhangluo Force-Directed Taste Star Graph", "live_api_key_configured": false, "live_http_called": false, "latency_ms": 36.2, "status_note": "Qloo Taste Graph Grounding (Deterministic Sandbox Mode — Set QLOO_API_KEY for live HTTP call)", "seed_signals": ["artisanal-tea", "heritage-craft", "low-purine-gourmet", "minimalist-home"], "cultural_taste_clusters": [{"cluster_id": "qloo:taste:artisanal_heritage_terroir", "name_en": "Single-Origin GI Terroir & 20-Yr Non-Chain Culinary Craft", "name_zh": "国家地标微产区与二十年非连锁老饕风味簇", "affinity_score": 0.96, "cross_domain_correlations": ["Xinhui Aged Tangerine Peel (GB/T 20560)", "Jiangnan Low-Purine Seasonal Banquet (Gout-Safe for Mr. Wang)", "Suzhou Osmanthus Winter Brew Return Gift"]}, {"cluster_id": "qloo:taste:anti_hype_functionalism", "name_en": "Anti-Hype Durable Homeware & Spatial Order", "name_zh": "去网红化耐用器用与起居空间秩序簇", "affinity_score": 0.94, "cross_domain_correlations": ["Unbranded Factory-Direct 65L Silicone-Seal Storage", "Solar-Term Preventive Appliance Care"]}], "ad_noise_rejection_rate": "94.2% paid-rank / franchise-chain candidates rejected by AAA Purity Filter"}, "nebius_nvidia_tavily": {"inference_engine": "Nebius Token Factory · NVIDIA Open-Source Model", "model_id": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF", "nebius_live_called": false, "hybrid_search_engine": "768-dim Vector + PostGIS Spatial-Temporal Tile (/api/v1/terroir/hybrid-search)", "video_sweep_vision": "VideoSweepRecorder (750ms diff >= 0.035) + recognize_household_items_from_sweep_frames", "tavily_search_verifier": {"enabled": true, "live_called": false, "verified_facts": ["National GI Standard GB/T 20560 verified for Xinhui Meijiang 5-Yr Chenpi", "Granary Cross-Check: Tianmu Bamboo Shoots expiring Oct 28 -> Paired into low-purine dinner for Mr. Wang", "Inventory Guard: 1x 65L spare box found in Study Tatami -> Saved $19.50 duplicate purchase"]}, "spatial_postgis_latency_ms": 18.6, "total_pipeline_latency_ms": 58.0}}}}, "/api/orchestrate": {"ok": true, "latest_orchestration": {"scenario": "all", "query": "Frost Descent: check winter duvet & storage boxes, plan gout-safe dinner for Mr. Wang", "solar_term": {"code": "shuangjiang", "name_zh": "霜降 · 初候豺乃祭兽", "name_en": "Frost's Descent (18th Solar Term · Pentad I)", "date_window": "Oct 23 – Nov 06", "city_zh": "上海 / 苏州 · 江南物候圈", "city_en": "Shanghai & Suzhou · Jiangnan Phenology Zone", "phenology_note_zh": "气肃而凝，露结为霜。宜消纳粮仓临期山珍、筹备待客秋宴、回赠中秋人情礼单、环扫收纳换季家当。", "phenology_note_en": "Late autumn frost approaches. Optimal window to cook expiring pantry mountain delicacies, host gout-safe autumn dinners, fulfill pending return gifts, and video-sweep seasonal closet inventory."}, "six_stage_chain": [{"stage": "1. Know Who You Are", "detail": "Force-Directed Taste Star Graph + OpenViking consent_id rules"}, {"stage": "2. Judge Why Now", "detail": "Frost's Descent (18th Solar Term · Pentad I) + Granary expiry & Gift window"}, {"stage": "3. Ground in Cultural Taste", "detail": "Qloo Taste AI (0.96) × 768-dim Vector + PostGIS 2,843-County Tile"}, {"stage": "4. Filter Out Paid Ad Noise", "detail": "AAA Purity Radar: >=10-yr longevity, <=2 branches (94.2% ads rejected)"}, {"stage": "5. Fiduciary Action Card", "detail": "Signed comparison_digest + PayPal Sandbox v2 + iOS EventKit Reminder"}, {"stage": "6. Learn With Explicit Consent", "detail": "MemoryInbox pending queue (`ov-pending-9904x`) + revocable discovery"}], "summary_zh": "【小张罗全维统筹完毕】1）『起居簿·家当』核验：次卧冬被已就位；书房已有 1 个闲置 65L 密封箱，自动为您拦截重复购买省下 $19.50！2）『起居簿·粮仓 × 待客』联动：厨房天目山扁尖笋干将于 10月28日临期，结合周末主客小王的「痛风忌高嘌呤」与老李「忌生葱蒜」备忘，已生成零高嘌呤《霜降待客定制家宴卡》；3）『起居簿·礼单 × 风物志』：针对中秋老陈送的阳澄湖大闸蟹，已通过 Qloo 品味图谱与 AAA 老饕去噪匹配『新会梅江五年陈 GI 陈皮礼盒（$38）』，一盒兼顾书房粮仓补仓与体面回礼！", "summary_en": "[Full 4-Tab Household & Taste Orchestration Complete] 1) Household Inventory (`起居簿·家当`): Winter duvet located in Guest Closet Bag #2; found 1 spare 65L box in Study Tatami—intercepting duplicate purchase & saving you $19.50! 2) Granary × Guest Hospitality (`粮仓 × 待客`): Kitchen Tianmu bamboo shoots expire Oct 28; cross-checked Mr. Wang's Gout (strictly low-purine) & Old Li's no-raw-scallion rules to generate your custom Frost's Descent Dinner Card. 3) Gift Reciprocity × Qloo Taste AI (`礼单 × 风物志`): Matched 'Xinhui Meijiang 5-Yr GI Aged Chenpi ($38)' (AAA Purity, 94.2% ad noise filtered) to simultaneously restock your Study Granary and fulfill Old Chen's Mid-Autumn crab return gift!", "matched_household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}], "orchestration_cards": [{"id": "tr-good-001", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "好物 · 国家地标 (GI) · AAA去噪", "type_label_en": "Terroir Good · National GI · AAA Anti-Noise", "title_zh": "广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈）", "title_en": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "provenance_zh": "广东省江门市新会区 · 梅江塞口围微产区 (22.512°N, 113.048°E)", "provenance_en": "Meijiang Micro-Terroir, Xinhui, Guangdong (22.512°N, 113.048°E)", "standard_code": "GB/T 20560 国家地理标志 · 26年柑园直供 · 分店=1", "solar_terms": ["霜降 Frost's Descent", "立冬 Start of Winter"], "anti_noise_score": 0.96, "anti_noise_note_zh": "老饕 AAA 去噪判词：剔除 94.2% 电商染色催熟青皮与竞价热榜贴牌店；油室均匀透光，既补足书房粮仓余量，又可体面回赠老陈中秋蟹礼。", "anti_noise_note_en": "AAA Anti-Noise Verdict: Filtered out 94.2% paid-ad dyed peel listings. Serves both your low-stock Study Granary (85g left) and Old Chen's pending return gift.", "price_usd": 38.0, "price_cny": 268, "commission_disclosure": "comparison_digest Verified · 0% Ad Boost", "qloo_tags": ["artisanal-tea", "slow-food", "heritage-craft", "botanical-gift"]}, {"id": "tr-good-003", "type": "GOOD", "purity_grade": "AAA", "type_label_zh": "买得对 · 起居簿查重省钱卡", "type_label_en": "Fiduciary Buy · Duplicate-Guard Verified", "title_zh": "加厚食品级 PP 双卡扣防潮密封箱 65L（配硅胶发泡密封圈 · 仅补购1个）", "title_en": "Heavy-Duty 65L Silicone-Gasket Moisture-Proof Storage Box (Buy 1 Instead of 2)", "provenance_zh": "浙江台州黄岩 · 出口级模具直造工坊", "provenance_en": "Huangyan Precision Mold Workshop, Taizhou, Zhejiang", "standard_code": "GB 4806.7 食品接触级 PP · 尺寸匹配书房闲置箱 60×42×34cm", "solar_terms": ["寒露 Cold Dew", "霜降 Frost's Descent"], "anti_noise_score": 0.93, "anti_noise_note_zh": "起居簿联动省钱：12秒视频扫屋已确认书房榻榻米有 1 个闲置 65L 箱，自动将采购量从 2 个减为 1 个，立省 $19.50！", "anti_noise_note_en": "Household Ledger Guard: 12-sec Video Sweep confirmed 1 spare 65L box in Study Tatami—automatically reduced order from 2 to 1, saving you $19.50!", "price_usd": 19.5, "price_cny": 138, "commission_disclosure": "Saves $19.50 via Household Ledger · 0% Ad Bias", "qloo_tags": ["minimalist-home", "japanese-organization", "durable-craft"]}, {"id": "tr-recipe-002", "type": "RECIPE_DINNER", "purity_grade": "AAA", "type_label_zh": "今日家宴卡 · 粮仓消纳 × 待客忌口定制", "type_label_en": "Daily Dinner Card · Granary × Guest Redline Matched", "title_zh": "霜降待客定制席：天目山扁尖清炖手撕鸡 + 苏造糟溜白鱼 + 桂花糖藕（零高嘌呤/无生葱蒜）", "title_en": "Frost's Descent Custom Banquet: Tianmu Bamboo Shoot Clear Broth + Steamed White Fish + Osmanthus Lotus Root", "provenance_zh": "联动【起居簿·粮仓】临期扁尖笋干 + 【起居簿·待客】小王痛风忌口 & 老李忌生葱蒜", "provenance_en": "Cross-linked with Expiring Granary Bamboo Shoots + Mr. Wang's Gout Low-Purine & Old Li's No-Raw-Scallion Rules", "standard_code": "《随园食单》古法去噪 · 常熟虞山 28 年非连锁老店同源手艺", "solar_terms": ["霜降 Frost's Descent"], "anti_noise_score": 0.97, "anti_noise_note_zh": "零浪费、零失礼：1）优先消纳厨房将于 10月28日临期的天目山扁尖笋干；2）严格避开小王的痛风高嘌呤海鲜浓汤红线与老李的生葱蒜红线。", "anti_noise_note_en": "Zero Food Waste & Zero Hospitality Faux Pas: Uses your expiring Tianmu bamboo shoots while strictly respecting Mr. Wang's gout redline and Old Li's no-raw-scallion rule.", "price_usd": 24.0, "price_cny": 168, "commission_disclosure": "Fresh Ingredient Bundle · Fiduciary Recipe Card", "qloo_tags": ["jiangnan-cuisine", "low-purine-gourmet", "seasonal-banquet", "heritage-dining"]}], "sponsor_telemetry": {"qloo": {"provider": "Qloo Taste AI Graph v2 × Zhangluo Force-Directed Taste Star Graph", "live_api_key_configured": false, "live_http_called": false, "latency_ms": 36.2, "status_note": "Qloo Taste Graph Grounding (Deterministic Sandbox Mode — Set QLOO_API_KEY for live HTTP call)", "seed_signals": ["artisanal-tea", "heritage-craft", "low-purine-gourmet", "minimalist-home"], "cultural_taste_clusters": [{"cluster_id": "qloo:taste:artisanal_heritage_terroir", "name_en": "Single-Origin GI Terroir & 20-Yr Non-Chain Culinary Craft", "name_zh": "国家地标微产区与二十年非连锁老饕风味簇", "affinity_score": 0.96, "cross_domain_correlations": ["Xinhui Aged Tangerine Peel (GB/T 20560)", "Jiangnan Low-Purine Seasonal Banquet (Gout-Safe for Mr. Wang)", "Suzhou Osmanthus Winter Brew Return Gift"]}, {"cluster_id": "qloo:taste:anti_hype_functionalism", "name_en": "Anti-Hype Durable Homeware & Spatial Order", "name_zh": "去网红化耐用器用与起居空间秩序簇", "affinity_score": 0.94, "cross_domain_correlations": ["Unbranded Factory-Direct 65L Silicone-Seal Storage", "Solar-Term Preventive Appliance Care"]}], "ad_noise_rejection_rate": "94.2% paid-rank / franchise-chain candidates rejected by AAA Purity Filter"}, "nebius_nvidia_tavily": {"inference_engine": "Nebius Token Factory · NVIDIA Open-Source Model", "model_id": "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF", "nebius_live_called": false, "hybrid_search_engine": "768-dim Vector + PostGIS Spatial-Temporal Tile (/api/v1/terroir/hybrid-search)", "video_sweep_vision": "VideoSweepRecorder (750ms diff >= 0.035) + recognize_household_items_from_sweep_frames", "tavily_search_verifier": {"enabled": true, "live_called": false, "verified_facts": ["National GI Standard GB/T 20560 verified for Xinhui Meijiang 5-Yr Chenpi", "Granary Cross-Check: Tianmu Bamboo Shoots expiring Oct 28 -> Paired into low-purine dinner for Mr. Wang", "Inventory Guard: 1x 65L spare box found in Study Tatami -> Saved $19.50 duplicate purchase"]}, "spatial_postgis_latency_ms": 18.6, "total_pipeline_latency_ms": 58.0}}}, "household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}]}, "/api/video-sweep": {"ok": true, "sweep": {"sweep_id": "SWEEP-1792767753", "room_name": "North Balcony Storage & Dining Sideboard", "duration_sec": 12, "sampling_interval_ms": 750, "diff_threshold": 0.035, "keyframes_extracted": [{"frame_index": 0, "timestamp_ms": 0, "diff_score": 1.0, "detected_item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "detected_item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "space_path_zh": "北阳台储物间 ➔ 立柜左格", "space_path_en": "North Balcony Storage ➔ Left Tall Cabinet", "confidence": 0.97}, {"frame_index": 1, "timestamp_ms": 1500, "diff_score": 0.068, "detected_item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "detected_item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "space_path_zh": "餐厅西厨柜 ➔ 下层酒格", "space_path_en": "Dining Sideboard ➔ Lower Wine Rack", "confidence": 0.96}], "timestamp": "2026-10-23T15:02:33Z"}, "household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}], "video_sweep_runs": [{"sweep_id": "SWEEP-1792767753", "room_name": "North Balcony Storage & Dining Sideboard", "duration_sec": 12, "sampling_interval_ms": 750, "diff_threshold": 0.035, "keyframes_extracted": [{"frame_index": 0, "timestamp_ms": 0, "diff_score": 1.0, "detected_item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "detected_item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "space_path_zh": "北阳台储物间 ➔ 立柜左格", "space_path_en": "North Balcony Storage ➔ Left Tall Cabinet", "confidence": 0.97}, {"frame_index": 1, "timestamp_ms": 1500, "diff_score": 0.068, "detected_item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "detected_item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "space_path_zh": "餐厅西厨柜 ➔ 下层酒格", "space_path_en": "Dining Sideboard ➔ Lower Wine Rack", "confidence": 0.96}], "timestamp": "2026-10-23T15:02:33Z"}]}, "/api/paypal-checkout": {"ok": true, "receipt": {"provider": "PayPal Developer Sandbox · Agentic Commerce v2", "paypal_order_id": "PAYPAL-SANDBOX-041DBCB542C7", "comparison_digest": "9176cced98549241112c56db27ff4ec6ceecc218d222d25233a8c6aa1db44232", "live_sandbox_authenticated": false, "status": "COMPLETED_AND_SYNCED_TO_HOUSEHOLD_LEDGER", "item_id": "tr-good-001", "item_title": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "quantity": 1, "total_charged_usd": 38.0, "fiduciary_savings_usd": 15.0, "fiduciary_audit": {"household_inventory_checked": true, "zero_ad_commission_bias": true, "post_purchase_ledger_sync": "Synced 'Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)' into Household Ledger (起居簿·家当/粮仓/礼单) & iOS EventKit."}, "timestamp": "2026-10-23T15:02:33Z"}, "orders": [{"provider": "PayPal Developer Sandbox · Agentic Commerce v2", "paypal_order_id": "PAYPAL-SANDBOX-041DBCB542C7", "comparison_digest": "9176cced98549241112c56db27ff4ec6ceecc218d222d25233a8c6aa1db44232", "live_sandbox_authenticated": false, "status": "COMPLETED_AND_SYNCED_TO_HOUSEHOLD_LEDGER", "item_id": "tr-good-001", "item_title": "Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)", "quantity": 1, "total_charged_usd": 38.0, "fiduciary_savings_usd": 15.0, "fiduciary_audit": {"household_inventory_checked": true, "zero_ad_commission_bias": true, "post_purchase_ledger_sync": "Synced 'Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen)' into Household Ledger (起居簿·家当/粮仓/礼单) & iOS EventKit."}, "timestamp": "2026-10-23T15:02:33Z"}], "household_ledger": [{"id": "hl-paid-1", "item_zh": "【PayPal受托新购】广东新会 · 梅江塞口围五年陈道地茶枝柑陈皮礼盒（兼顾粮仓补仓与回赠老陈） × 1", "item_en": "[PayPal Fiduciary Order] Xinhui Meijiang 5-Year Sun-Dried GI Aged Chenpi Box (Restocks Granary + Return Gift for Old Chen) × 1", "category": "已购自动入簿 / PayPal Agentic Sync", "location_zh": "待签收 · 已同步起居簿与 iOS 提醒事项", "location_en": "In Transit · Linked to PAYPAL-SANDBOX-041DBCB542C7 & iOS EventKit", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 1.0, "evidence_zh": "PayPal 受托支付完成（签名摘要 9176cced98... · 省下 $15.00）", "evidence_en": "Captured via PayPal Sandbox (PAYPAL-SANDBOX-041DBCB542C7); saved $15.00", "status": "ACTIVE"}, {"id": "hl-sweep-5", "item_zh": "苏州东山古法桂花冬酿酒（2瓶未拆封）", "item_en": "Suzhou Dongshan Osmanthus Winter Wine (2 Unopened Bottles)", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "餐厅西厨柜 ➔ 下层酒格", "location_en": "Dining Sideboard ➔ Lower Wine Rack", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.96, "evidence_zh": "VideoSweepRecorder 关键帧 #1 (帧差 diff=0.068) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #1 (pixel diff=0.068) batch intake", "status": "ACTIVE"}, {"id": "hl-sweep-4", "item_zh": "戴森吸尘器 V12 + 备用HEPA滤网", "item_en": "Dyson V12 Vacuum + Spare HEPA Filter", "category": "12秒视频环扫入库 / Video Sweep Batch", "location_zh": "北阳台储物间 ➔ 立柜左格", "location_en": "North Balcony Storage ➔ Left Tall Cabinet", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-23", "confidence": 0.97, "evidence_zh": "VideoSweepRecorder 关键帧 #0 (帧差 diff=1.0) 自动识别入库", "evidence_en": "VideoSweepRecorder Keyframe #0 (pixel diff=1.0) batch intake", "status": "ACTIVE"}, {"id": "hl-001", "item_zh": "鹅绒冬被（220×240cm）", "item_en": "Goose Down Winter Duvet (220×240cm)", "category": "日用起居 / Bedding", "location_zh": "次卧衣柜 ➔ 顶层右侧 ➔ 2号真空袋", "location_en": "Guest Closet ➔ Top Shelf ➔ Vacuum Bag #2", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-14", "confidence": 0.98, "evidence_zh": "12秒视频环扫识物 + 语音确认（状态：已确认 active）", "evidence_en": "12-sec Video Sweep keyframe #3 + Voice confirmed (Status: active)", "status": "ACTIVE"}, {"id": "hl-002", "item_zh": "PP 密封防潮收纳箱（65L）× 2 个", "item_en": "65L Airtight Moisture-Proof Storage Box (×2)", "category": "日用起居 / Storage", "location_zh": "书房榻榻米 ➔ 左格（闲置 1 个可用）", "location_en": "Study Tatami ➔ Left Compartment (1 spare available)", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-10-18", "confidence": 0.99, "evidence_zh": "【买前自动查重拦截】家里已有 1 个闲置 65L 箱，立省 $19.50，仅需补购 1 个", "evidence_en": "[Duplicate-Buy Guard] 1 spare 65L box found in Study Tatami; saves $19.50 (50%)", "status": "SPARE_AVAILABLE"}, {"id": "hl-003", "item_zh": "松下除湿机 F-Y22（绑定岁时维保卡）", "item_en": "Panasonic Dehumidifier F-Y22 (Linked to Solar Maintenance)", "category": "家用电器 / Appliance", "location_zh": "北阳台 ➔ 储物间下层", "location_en": "North Balcony ➔ Storage Room Lower Tier", "owner_scope": "全家可见 (household_shared)", "last_verified": "2026-09-28", "confidence": 0.95, "evidence_zh": "维保状态：临期待保 (due_soon) · 滤网距上次清洗已满 180 天，可一键写入 iOS 提醒事项", "evidence_en": "Maintenance: due_soon (180 days since filter clean). Ready for iOS EventKit Reminder sync", "status": "MAINTENANCE_DUE"}], "gift_records": [{"id": "gift_crab_02", "type": "received", "counterparty_zh": "老陈（大学同窗）", "counterparty_en": "Old Chen (University Classmate)", "occasion_zh": "中秋探访收礼 · 待霜降回礼", "occasion_en": "Received at Mid-Autumn · Pending Frost's Descent Return Gift", "giftItem_zh": "已收：阳澄湖生态大闸蟹礼卡（4公4母 · 约¥888）", "giftItem_en": "Received: Yangcheng Lake Hairy Crab Gift Card (8 crabs · ~$125)", "returnPlan_zh": "备忘回礼：霜降前后回赠『苏州东山古法桂花冬酿酒 + 新会梅江五年陈皮礼盒』", "returnPlan_en": "Return Gift Plan: Send 'Suzhou Osmanthus Winter Wine + Xinhui 5-Yr GI Aged Chenpi Gift Box' ($38.00)", "status": "completed_via_paypal"}]}, "/api/memory-consent": {"ok": true, "updated_memory": {"id": "mem-001", "category": "Taste Graph / 知味偏好 (OpenViking)", "statement_zh": "偏爱干仓老陈皮、明前龙井与山野笋菌；反感香精调味茶与连锁预制菜", "statement_en": "Prefers dry-aged Chenpi, Lion Peak Longjing & wild mountain bamboo/fungi; rejects artificial teas & pre-made chain food", "status": "CONFIRMED", "consent_id": "ov-consent-8821a", "release_identity": "zl-ios-2026.10", "source_zh": "用户已手动确认写入长期画像（23:02:33）", "source_en": "Confirmed by user at 23:02:33 UTC (consent_id verified)"}, "memories": [{"id": "mem-001", "category": "Taste Graph / 知味偏好 (OpenViking)", "statement_zh": "偏爱干仓老陈皮、明前龙井与山野笋菌；反感香精调味茶与连锁预制菜", "statement_en": "Prefers dry-aged Chenpi, Lion Peak Longjing & wild mountain bamboo/fungi; rejects artificial teas & pre-made chain food", "status": "CONFIRMED", "consent_id": "ov-consent-8821a", "release_identity": "zl-ios-2026.10", "source_zh": "用户已手动确认写入长期画像（23:02:33）", "source_en": "Confirmed by user at 23:02:33 UTC (consent_id verified)"}, {"id": "mem-002", "category": "Hospitality & Gift Rule / 待客礼单契约", "statement_zh": "组局家宴自动核对【待客备忘】亲友忌口（如痛风低嘌呤、忌生葱蒜），节气前7天提醒【人情礼单】待回礼事项", "statement_en": "Always cross-check Guest Dietary Redlines (gout, allergies) when planning dinners & alert Pending Return Gifts 7 days before solar terms", "status": "CONFIRMED", "consent_id": "ov-consent-8829c", "release_identity": "zl-ios-2026.10", "source_zh": "家庭共享级规则 (household_shared)", "source_en": "Household-shared fiduciary rule"}, {"id": "mem-003", "category": "MemoryInbox Pending / 待确认候选记忆", "statement_zh": "候选推断：检测到您通过 12 秒视频环扫录入了次卧冬被与除湿机，是否在每年霜降前自动生成 iOS 日历除湿保养提醒？", "statement_en": "Candidate Inference: After your 12-sec Video Sweep of Guest Closet & Dehumidifier, auto-schedule an iOS EventKit Reminder every Frost's Descent?", "status": "PENDING_CONSENT", "consent_id": "ov-pending-9904x", "release_identity": "zl-ios-2026.10", "source_zh": "进入 MemoryInbox 待确认区 · 未经确认绝不改写正式画像", "source_en": "Held in MemoryInbox · Blocked until explicit user consent_id approval"}]}, "/api/proof-of-taste": {"ok": true, "attestation": {"attestation_id": "PoT-0x67a55e0d49d8effb", "note": "Verified 26-year non-chain orchard in Xinhui.", "city": "Xinhui, Guangdong", "privacy_mode": "Default Private -> User Opt-in Anonymized & Geo-Verified (Revocable anytime)", "anti_noise_passed": true, "purity_grade": "AAA", "qloo_cluster": "qloo:taste:artisanal_heritage_terroir", "timestamp": "2026-10-23T15:02:33Z"}, "attestations": [{"attestation_id": "PoT-0x67a55e0d49d8effb", "note": "Verified 26-year non-chain orchard in Xinhui.", "city": "Xinhui, Guangdong", "privacy_mode": "Default Private -> User Opt-in Anonymized & Geo-Verified (Revocable anytime)", "anti_noise_passed": true, "purity_grade": "AAA", "qloo_cluster": "qloo:taste:artisanal_heritage_terroir", "timestamp": "2026-10-23T15:02:33Z"}]}};
+    const _origFetch = window.fetch.bind(window);
+    window.fetch = async function(url, opts) {
+      try {
+        const res = await _origFetch(url, opts);
+        if (res && res.ok) return res;
+      } catch (e) {}
+      const path = typeof url === 'string' ? url.split('?')[0] : '';
+      let payload = STATIC_MOCKS[path];
+      if (payload) {
+        return new Response(JSON.stringify(payload), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      throw new Error('Unmocked path: ' + path);
+    };
+    // --- STATIC GITHUB PAGES FALLBACK END ---
+    let STATE = null;
+    let LANG = 'en';
+    let TRACK_MODE = 'all';
+
+    function showToast(msg) {
+      const el = document.getElementById('action-toast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 5500);
+    }
+
+    function toggleLang() { LANG = LANG === 'en' ? 'zh' : 'en'; renderAll(); }
+
+    function setTrackMode(mode, btn) {
+      TRACK_MODE = mode;
+      document.querySelectorAll('.controls-row .pill-btn').forEach(b => { if (b.id !== 'lang-btn') b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('active-mode-badge').textContent = 'MODE: ' + mode.toUpperCase();
+      renderAll();
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+      document.getElementById('tab-' + tabId).style.display = 'block';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function loadInitialState() {
+      const res = await fetch('/api/state');
+      STATE = await res.json();
+      renderAll();
+    }
+
+    async function runOrchestrate() {
+      const query = document.getElementById('omni-input').value;
+      const res = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query, scenario: TRACK_MODE})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.latest_orchestration = data.latest_orchestration;
+        STATE.household_ledger = data.household_ledger;
+        renderAll();
+        showToast('✓ 6-Stage Orchestration completed across Granary, Inventory, Guest Redlines, Gift Ledger & Qloo Taste AI.');
+      }
+    }
+
+    async function triggerVideoSweep() {
+      const res = await fetch('/api/video-sweep', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({room_name: 'North Balcony Storage & Dining Sideboard'})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.household_ledger = data.household_ledger;
+        STATE.video_sweep_runs = data.video_sweep_runs;
+        renderAll();
+        showToast(`🎥 12s Video Sweep (${data.sweep.sweep_id}) extracted 2 keyframes (diff >= 0.035) and batch-added Dyson V12 & Suzhou Winter Wine into 起居簿·家当!`);
+      }
+    }
+
+    async function triggerPayPalCheckout(itemId) {
+      const res = await fetch('/api/paypal-checkout', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({item_id: itemId, quantity: 1})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.orders = data.orders;
+        STATE.household_ledger = data.household_ledger;
+        STATE.gift_records = data.gift_records;
+        renderAll();
+        const r = data.receipt;
+        showToast(`💳 PayPal Order ${r.paypal_order_id} Captured ($${r.total_charged_usd})! Saved $${r.fiduciary_savings_usd} & synced to 起居簿.`);
+      }
+    }
+
+    async function updateConsent(memoryId, action) {
+      const res = await fetch('/api/memory-consent', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({memory_id: memoryId, action})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.memories = data.memories;
+        renderAll();
+        showToast(`🔒 OpenViking Memory (${memoryId}) updated to: ${action.toUpperCase()}`);
+      }
+    }
+
+    async function submitProofOfTaste() {
+      const note = document.getElementById('pot-input').value;
+      const res = await fetch('/api/proof-of-taste', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({note, city: 'Changshu, Suzhou'})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        STATE.attestations = data.attestations;
+        renderAll();
+        showToast(`🌟 Proof-of-Taste Attestation Minted: ${data.attestation.attestation_id}`);
+      }
+    }
+
+    function renderAll() {
+      if (!STATE) return;
+      const orch = STATE.latest_orchestration;
+      const st = STATE.solar_term;
+
+      document.getElementById('solar-title').textContent = LANG === 'en'
+        ? `24 SOLAR TERMS · ${st.name_en} (${st.date_window})`
+        : `二十四节气物候 · ${st.name_zh}（${st.date_window}）`;
+      document.getElementById('solar-desc').textContent = LANG === 'en' ? st.phenology_note_en : st.phenology_note_zh;
+      document.getElementById('orch-summary').textContent = LANG === 'en' ? orch.summary_en : orch.summary_zh;
+
+      document.getElementById('stage-list').innerHTML = orch.six_stage_chain.map(s => `
+        <div class="stage-item"><strong>${s.stage}</strong><span>${s.detail}</span></div>
+      `).join('');
+
+      const renderCards = (items) => items.map(item => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="badge badge-green">${LANG === 'en' ? item.type_label_en : item.type_label_zh}</span>
+              <span class="badge badge-amber" style="margin-left:6px;">Purity: ${item.purity_grade} (${(item.anti_noise_score * 100).toFixed(0)}%)</span>
+            </div>
+            <strong style="color: var(--nuan-hupo-light); font-size: 15px;">$${item.price_usd.toFixed(2)} <span style="font-size:11px;color:var(--moonstone);">(¥${item.price_cny})</span></strong>
+          </div>
+          <div class="card-title">${LANG === 'en' ? item.title_en : item.title_zh}</div>
+          <div class="card-meta">📍 ${LANG === 'en' ? item.provenance_en : item.provenance_zh} · 📜 ${item.standard_code}</div>
+          <div class="anti-noise-box">🛡️ ${LANG === 'en' ? item.anti_noise_note_en : item.anti_noise_note_zh}</div>
+          <div class="card-actions">
+            <span style="font-size: 11px; color: var(--moonstone);">Qloo Tags: ${item.qloo_tags.join(', ')} · ${item.commission_disclosure}</span>
+            <button class="amber-btn" onclick="triggerPayPalCheckout('${item.id}')">
+              💳 ${LANG === 'en' ? 'Authorize PayPal Fiduciary Order' : '授权 PayPal 受托下单并同步起居簿'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('orch-cards').innerHTML = renderCards(orch.orchestration_cards);
+      document.getElementById('terroir-list').innerHTML = renderCards(STATE.terroir_assets);
+
+      document.getElementById('granary-list').innerHTML = (STATE.granary_items || []).map(g => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${g.category}</span>
+            <span class="badge badge-amber">Status: ${g.status.toUpperCase()} · Best Before: ${g.bestBefore}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? g.name_en : g.name_zh} (${g.quantity})</div>
+          <div class="card-meta">📍 ${LANG === 'en' ? g.storageLocation_en : g.storageLocation_zh} · Origin: ${g.seasonalOrigin}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? g.notes_en : g.notes_zh}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('ledger-list').innerHTML = STATE.household_ledger.map(h => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${h.category}</span>
+            <span class="badge badge-amber">Confidence: ${(h.confidence * 100).toFixed(0)}% · ${h.status}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? h.item_en : h.item_zh}</div>
+          <div class="card-meta">📦 Path: <strong>${LANG === 'en' ? h.location_en : h.location_zh}</strong> · ${h.owner_scope}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? h.evidence_en : h.evidence_zh}</div>
+        </div>
+      `).join('');
+
+      const guestsHtml = (STATE.guest_notes || []).map(gn => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">待客备忘 Guest Hospitality</span>
+            <span class="badge badge-amber">${(LANG === 'en' ? gn.dietaryRestrictions_en : gn.dietaryRestrictions_zh).join(' | ')}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? gn.guestName_en : gn.guestName_zh}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? gn.notes_en : gn.notes_zh}</div>
+        </div>
+      `).join('');
+
+      const giftsHtml = (STATE.gift_records || []).map(gr => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-amber">人情礼单 Gift Reciprocity (${gr.status})</span>
+            <span class="badge badge-green">${LANG === 'en' ? gr.occasion_en : gr.occasion_zh}</span>
+          </div>
+          <div class="card-title">${LANG === 'en' ? gr.counterparty_en : gr.counterparty_zh} · ${LANG === 'en' ? gr.giftItem_en : gr.giftItem_zh}</div>
+          <div class="anti-noise-box">${LANG === 'en' ? gr.returnPlan_en : gr.returnPlan_zh}</div>
+        </div>
+      `).join('');
+      document.getElementById('guests-gifts-list').innerHTML = guestsHtml + giftsHtml;
+
+      document.getElementById('taste-graph-box').innerHTML = (STATE.taste_graph_nodes || []).map(n => `
+        <span class="badge ${n.type === 'user' ? 'badge-amber' : 'badge-green'}" style="padding:6px 10px;">
+          ${LANG === 'en' ? n.label_en : n.label_zh} (${(n.weight * 100).toFixed(0)}%)
+        </span>
+      `).join('');
+
+      document.getElementById('memory-list').innerHTML = STATE.memories.map(m => `
+        <div class="card">
+          <div class="card-header">
+            <span class="badge badge-green">${m.category}</span>
+            <span class="badge badge-amber">${m.status} · ${m.consent_id}</span>
+          </div>
+          <div class="card-title" style="font-size:13.5px;">${LANG === 'en' ? m.statement_en : m.statement_zh}</div>
+          <div class="card-meta">${LANG === 'en' ? m.source_en : m.source_zh}</div>
+          <div class="card-actions">
+            <button class="pill-btn" onclick="updateConsent('${m.id}', 'confirm')">✓ Confirm into OpenViking Profile</button>
+            <button class="pill-btn" onclick="updateConsent('${m.id}', 'revoke')">✕ Revoke & Purge Memory</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('pot-list').innerHTML = (STATE.attestations || []).map(a => `
+        <div style="margin-top:8px; padding:8px; background:#141418; border-radius:8px; font-size:12px;">
+          <strong style="color:var(--nuan-hupo-light);">${a.attestation_id}</strong> (${a.purity_grade}) · ${a.city}<br/>
+          <span>${a.note}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('ios-plugins-box').innerHTML = (STATE.ios_plugins || []).map(p => `
+        <div style="margin-bottom:4px;">• <code>${p.plugin}</code>: ${LANG === 'en' ? p.capability_en : p.capability_zh}</div>
+      `).join('');
+
+      const qloo = orch.sponsor_telemetry.qloo;
+      document.getElementById('qloo-summary').innerHTML = qloo.cultural_taste_clusters.map(c =>
+        `<div>• <strong>${LANG === 'en' ? c.name_en : c.name_zh}</strong> (${c.affinity_score})<br/>  ${c.cross_domain_correlations.join(' · ')}</div>`
+      ).join('') + `<div style="margin-top:4px;color:#8FD4BE;">✓ ${qloo.ad_noise_rejection_rate}</div>`;
+
+      const neb = orch.sponsor_telemetry.nebius_nvidia_tavily;
+      document.getElementById('nebius-summary').innerHTML = `
+        <div>• Model: <code>${neb.model_id}</code> (${neb.total_pipeline_latency_ms}ms)</div>
+        <div>• Vision: <code>${neb.video_sweep_vision}</code></div>
+        <div style="margin-top:4px;">• <strong>Tavily Verified:</strong><br/>${neb.tavily_search_verifier.verified_facts.map(f => '  ✓ ' + f).join('<br/>')}</div>
+      `;
+
+      if (STATE.orders && STATE.orders.length > 0) {
+        document.getElementById('paypal-orders').innerHTML = STATE.orders.map(o => `
+          <div style="padding:5px 0; border-bottom:1px solid var(--glass-border);">
+            <strong style="color:#8FD4BE;">${o.paypal_order_id}</strong> · <strong>$${o.total_charged_usd.toFixed(2)}</strong>
+            (Saved <strong>$${o.fiduciary_savings_usd.toFixed(2)}</strong>)<br/>
+            <span style="color:var(--nuan-hupo-light);">✓ ${o.fiduciary_audit.post_purchase_ledger_sync}</span>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('raw-telemetry').textContent = JSON.stringify({
+        active_track_mode: TRACK_MODE,
+        qloo_taste_graph: qloo,
+        nebius_nvidia_tavily: neb,
+        video_sweep_runs: STATE.video_sweep_runs.slice(0, 1),
+        latest_paypal_orders: STATE.orders.slice(0, 2),
+      }, null, 2);
+    }
+
+    loadInitialState();
+  </script>
+</body>
+</html>
