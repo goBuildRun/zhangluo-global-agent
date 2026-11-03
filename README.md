@@ -109,6 +109,20 @@ We explicitly document current failure boundaries and how the system degrades sa
 
 ---
 
+## ⚖️ Judging Rubric & Stage Two Evaluation Alignment (PayPal AI Hackathon)
+
+In response to the official Devpost Stage Two judging rubric (scoring projects 1 to 5 across five core dimensions), Zhangluo's implementation directly addresses each evaluation pillar:
+
+| Official Rubric Dimension | Zhangluo Concrete Implementation & Evidence | Verification Anchor |
+| :--- | :--- | :--- |
+| **1. Technological Implementation** | Full-stack Python 3.10+ adapter with live **PayPal Orders v2 (`/v2/checkout/orders`)**, SHA-256 `comparison_digest` anti-tamper cryptographic check, 12-second camera `VideoSweepRecorder` keyframe diffing ($\Delta \ge 0.035$), and auditable `OpenViking` sovereign memory. Zero external dependencies required to run locally. | [`integrations.py`](./integrations.py), [`server.py`](./server.py), [`tests/test_zhangluo_hackathon_adapter.py`](./tests/test_zhangluo_hackathon_adapter.py) |
+| **2. Design & UX** | 4 intuitive life orchestrator tabs (`找张罗` · `起居簿` · `风物志` · `自留地`); elder-friendly zero-typing streaming voice dictation and 12s video sweep; fail-closed uncertainty disclosure. | Web UI at `http://127.0.0.1:8765`, [`static/index.html`](./static/index.html) |
+| **3. Potential Impact** | Fiduciary purchase interception: checks household storage *before* hitting checkout to eliminate duplicate spending ($19.50 savings demonstrated in demo); enforces multi-generational health redlines (purine/allergy filters); empowers 2,843 non-franchise local terroir producers. | Demo Video `0:00 - 0:28`, User Study (18 households) |
+| **4. Innovation / Idea** | Fundamentally reimagines Agentic Commerce: moves away from extractive chatbots pushing sponsored affiliate links to a fiduciary life steward that coordinates pantry memory, gift reciprocity (`人情礼单`), and auditable payment settlement. | Core Architecture section, Demo Video `1:26 - 1:48` |
+| **5. Presentation** | Concise 1m48s 1080p English narrated demo ([https://youtu.be/1wwW4HmMAUA](https://youtu.be/1wwW4HmMAUA), strictly under the 3-minute limit); automated test suite (`pytest`); fully documented failure boundaries and safe degradation paths. | Demo Video, Section 6 & 7 |
+
+---
+
 ## 🛠️ What Was Built & Updated During the Hackathon Submission Period
 
 - Built the standalone, zero-proprietary-leak **Zhangluo Global Agent Adapter** (`server.py`, `integrations.py`, interactive 4-tab workbench UI, and `pytest` verification suite).
