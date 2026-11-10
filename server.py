@@ -11,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any, Dict
 
+from firebase_hybrid_ai import compute_keyframe_diff_filter, route_hybrid_inference
 from integrations import SOLAR_TERM_CONTEXT, ZhangluoHackathonEngine
 
 ENGINE = ZhangluoHackathonEngine()
@@ -90,6 +91,33 @@ def handle_api_request(method: str, path: str, body: Dict[str, Any]) -> Dict[str
             "ok": True,
             "attestation": record,
             "attestations": ENGINE.proof_of_taste_attestations,
+        }
+
+    if method == "POST" and path == "/api/hybrid-ai/infer":
+        task_type = str(body.get("task_type") or "multi_constraint_orchestration")
+        prompt = str(body.get("prompt") or "Check Study Tatami 65L storage box duplicate and plan low-purine dinner.")
+        network_online = bool(body.get("network_online", True))
+        constraints_count = int(body.get("constraints_count") or 4)
+        has_unmasked_pii = bool(body.get("has_unmasked_pii", False))
+        frames = body.get("frames") or [
+            {"diff_score": 0.0, "contains_pii": False, "labels": ["65L Moisture-Proof Storage Box"]},
+            {"diff_score": 0.012, "contains_pii": False, "labels": ["65L Moisture-Proof Storage Box"]},
+            {"diff_score": 0.048, "contains_pii": True, "labels": ["Xinhui 5-Year Chenpi Tin", "Family Address Label"]},
+            {"diff_score": 0.009, "contains_pii": False, "labels": ["Xinhui 5-Year Chenpi Tin"]},
+            {"diff_score": 0.062, "contains_pii": False, "labels": ["Lin'an Winter Bamboo Shoots"]},
+        ]
+        sweep_filter = compute_keyframe_diff_filter(frames)
+        routing = route_hybrid_inference(
+            task_type=task_type,
+            prompt=prompt,
+            network_online=network_online,
+            constraints_count=constraints_count,
+            has_unmasked_pii=has_unmasked_pii,
+        )
+        return {
+            "ok": True,
+            "hybrid_routing": routing,
+            "on_device_sweep_filter": sweep_filter,
         }
 
     return {"ok": False, "error": f"Unknown endpoint {method} {path}"}
