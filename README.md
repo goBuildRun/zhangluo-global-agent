@@ -29,6 +29,10 @@ Families refuse to upload sensitive medical dietary redlines (e.g., severe gout 
 | **2. Public Recipe Synthesis & Merchant Warranty Grounding** | `CLOUD_FIREBASE_GEMINI_FLASH` | **Google Firebase AI Logic (`firebase-ai/gemini-2.5-flash`)** | Structured JSON schema synthesis (`~410ms`) over public non-PII product metadata. |
 | **3. Airplane Mode / Offline Resilience (`navigator.onLine == false`)** | `OFFLINE_LOCAL_FALLBACK` | **Chrome Built-in AI (`gemini-nano-v2`)** | Seamless zero-crash failover to on-device inference when Wi-Fi or cellular drops. |
 
+> 📚 **Official Specifications & Workshop Synchronization**:
+> - **Google #BuildHybridAI 2026 Standards**: Aligned with Google's official hybrid inference architecture ([firebase.google.com/docs/ai-logic/hybrid](https://firebase.google.com/docs/ai-logic/hybrid)). Join the live Firebase Build Session on Thursday, Nov 12, 10:00 AM PT ([RSVP via Luma](https://luma.com/bapqqd3n)). Portal opens Wednesday, Nov 11 at 9:00 AM PT (`2026-11-12 01:00 UTC+8`) through Monday, Nov 30 at 2:00 PM PT (`2026-12-01 06:00 UTC+8`).
+> - **UGREEN UGOS Pro Open Smart-Home Hub**: Per official UGREEN NAS architectural guidelines ([community.ugreen.com](https://community.ugreen.com/nas/#/pagesD/circle/post?id=1548)), Zhangluo deploys seamlessly alongside **Home Assistant** in Docker and **Surveillance Center**, enabling private local automation and camera sweeps around data already secured on local RAID-1 storage.
+
 ---
 
 ## 🌟 Core Differentiators (Why Zhangluo Is Not Another Chatbot)

@@ -2,7 +2,7 @@
 Zhangluo (小張羅) — Firebase AI Logic Hybrid Inference Router (#BuildHybridAI 2026)
 ===================================================================================
 Implements the On-Device + Cloud Hybrid AI execution pipeline required by Google's
-#BuildHybridAI 2026 hackathon:
+#BuildHybridAI 2026 hackathon (https://firebase.google.com/docs/ai-logic/hybrid):
   1. Edge / On-Device Tier (Gemini Nano / Apple CoreML / 750ms Pixel-Diff Filter):
      - Executes deterministic frame differencing (`differenceScore >= 0.035`),
        on-device PII redaction (faces, personal mail, credit cards), and local SQLite
@@ -25,6 +25,9 @@ from typing import Any, Dict, List
 
 HYBRID_SDK_CONFIG = {
     "sdk": "firebase-ai-logic-hybrid-v2",
+    "docs_url": "https://firebase.google.com/docs/ai-logic/hybrid",
+    "build_session_url": "https://luma.com/bapqqd3n",
+    "submission_window": "2026-11-11T09:00:00-08:00 to 2026-11-30T14:00:00-08:00",
     "on_device_model": "gemini-nano-on-device / apple-coreml-vision-v4",
     "cloud_fallback_model": "gemini-2.5-flash (via Firebase AI Logic)",
     "mode": "PREFER_ON_DEVICE_WITH_CLOUD_ESCALATION",
