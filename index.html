@@ -287,7 +287,7 @@
             </div>
           </div>
           <p style="font-size:12.5px; color:var(--frost-white-dim); line-height:1.5; margin-bottom:10px;" id="hybrid-explainer">
-            <strong>Why Hybrid AI &amp; Local NAS Storage Are Essential Here:</strong> Families refuse to upload medical allergies (gout purine redlines, prescriptions, child peanut anaphylaxis), private home camera sweeps, or bank receipts to public cloud LLMs. Zhangluo routes <strong>all PII/medical/camera-sweep tasks 100% On-Device (`Chrome Built-in Gemini Nano` / local `UGREEN NAS UGOS Pro Docker Vault`, `0 bytes sent to cloud`)</strong> while delegating public product price &amp; warranty checks to <strong>Cloud (`Firebase AI Logic Gemini 2.5 Flash`)</strong> with automatic offline fallback.
+            <strong>Why Hybrid AI &amp; Local NAS Storage Are Essential Here:</strong> Families refuse to upload medical allergies (gout purine redlines, prescriptions, child peanut anaphylaxis), private home camera sweeps, or bank receipts to public cloud LLMs. Zhangluo routes <strong>all PII/medical/camera-sweep tasks 100% On-Device (`Chrome Built-in Gemini Nano 4` / `Apple Foundation Models` on iOS / local `UGREEN NAS UGOS Pro Docker Vault`, `0 bytes sent to cloud`)</strong> while delegating public product price, warranty &amp; elder read-aloud TTS synthesis to <strong>Zero-Billing Cloud (`Firebase AI Logic gemini-3.8-flash` &amp; `gemini-3.1-flash-tts-preview`)</strong> with automatic offline fallback.
           </p>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
             <button class="amber-btn" onclick="runHybridPreset('medical_redline')">🩺 1. Test Medical Allergy &amp; Rx Guard (Force On-Device · 0 Cloud Bytes)</button>
@@ -408,8 +408,8 @@
           <span class="badge badge-green" id="hybrid-route-badge">0 Cloud Leak</span>
         </div>
         <div id="hybrid-aside-summary" style="font-size: 11.5px; color: var(--frost-white-dim); line-height: 1.45;">
-          • <strong>On-Device (`window.ai` Gemini Nano):</strong> Medical allergies, Rx &amp; camera sweeps (`0 bytes sent`)<br/>
-          • <strong>Cloud (`Firebase AI Logic`):</strong> Public menu &amp; merchant price grounding (`gemini-2.5-flash`)<br/>
+          • <strong>On-Device (`Gemini Nano 4` / `Apple Foundation`):</strong> Medical allergies, Rx &amp; sweeps (`0 bytes sent`)<br/>
+          • <strong>Cloud Free-Tier (`Firebase AI Logic`):</strong> Public grounding &amp; TTS (`gemini-3.8-flash` / `3.1-tts`)<br/>
           • <strong>Edge Storage (`UGREEN UGOS Pro`):</strong> RAID-1 local inventory &amp; duplicate guard (`-$19.50`)
         </div>
       </div>
@@ -517,21 +517,21 @@
       const privacyTriggered = matched.length > 0 || taskType === 'dietary_redline_audit' || taskType === 'household_inventory_extract';
 
       let target = 'CLOUD_FIREBASE_GEMINI_FLASH';
-      let modelId = 'firebase-ai/gemini-2.5-flash';
-      let reason = 'Public non-PII query routed to Firebase AI Logic cloud model for deep synthesis.';
+      let modelId = 'firebase-ai/gemini-3.8-flash';
+      let reason = 'Public non-PII query routed to Firebase AI Logic free-tier cloud model (gemini-3.8-flash + gemini-3.1-flash-tts-preview, billing not required).';
       let latencyMs = 412.0;
       let netBytes = (promptText || '').length + 256;
 
       if (forceOnDevice || privacyTriggered) {
         target = 'ON_DEVICE_GEMINI_NANO';
-        modelId = 'chrome-builtin:gemini-nano-v2';
-        reason = `Privacy redline triggered (${matched.slice(0, 4).join(', ') || taskType}): sensitive medical/financial/home-camera data strictly isolated on-device (0 bytes sent to cloud).`;
+        modelId = 'chrome-builtin:gemini-nano-4';
+        reason = `Privacy redline triggered (${matched.slice(0, 4).join(', ') || taskType}): sensitive medical/financial/home-camera data strictly isolated on-device via Gemini Nano 4 / Apple Foundation Models (0 bytes sent to cloud).`;
         latencyMs = 18.4;
         netBytes = 0;
       } else if (!isOnline) {
         target = 'OFFLINE_LOCAL_FALLBACK';
-        modelId = 'chrome-builtin:gemini-nano-v2';
-        reason = 'Network offline (navigator.onLine == false): seamlessly failed over from Firebase AI Logic to local Chrome Built-in Gemini Nano.';
+        modelId = 'chrome-builtin:gemini-nano-4';
+        reason = 'Network offline (navigator.onLine == false): seamlessly failed over from Firebase AI Logic to local On-Device Gemini Nano 4.';
         latencyMs = 22.1;
         netBytes = 0;
       }
@@ -543,8 +543,8 @@
         saved_usd: 19.50,
         ugreen_nas_vault_path: '/volume1/docker/zhangluo-vault/household_ledger.sqlite',
         summary: target === 'CLOUD_FIREBASE_GEMINI_FLASH'
-          ? 'Firebase AI Logic (gemini-2.5-flash) verified 10-year merchant longevity and cross-checked local inventory (1 spare 65L box found -> saved $19.50).'
-          : 'On-Device Gemini Nano enforced strict medical allergy & purine redlines locally in 18.4ms without transmitting any family health data over the network.'
+          ? 'Firebase AI Logic (gemini-3.8-flash free tier) verified 10-year merchant longevity and cross-checked local inventory (1 spare 65L box found -> saved $19.50).'
+          : 'On-Device Gemini Nano 4 / Apple Foundation Models enforced strict medical allergy & purine redlines locally in 18.4ms without transmitting any family health data over the network.'
       };
 
       return {
