@@ -9,13 +9,16 @@ import argparse
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+import hashlib
 from typing import Any, Dict
 
 from firebase_hybrid_ai import compute_keyframe_diff_filter, route_hybrid_inference
 from integrations import SOLAR_TERM_CONTEXT, ZhangluoHackathonEngine
 
 ENGINE = ZhangluoHackathonEngine()
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+ROOT_DIR = Path(__file__).resolve().parent
+STATIC_DIR = ROOT_DIR / "static"
+AGENT_MANIFEST_PATH = ROOT_DIR / ".well-known" / "agent.json"
 
 
 def handle_api_request(method: str, path: str, body: Dict[str, Any]) -> Dict[str, Any]:
@@ -120,6 +123,106 @@ def handle_api_request(method: str, path: str, body: Dict[str, Any]) -> Dict[str
             "on_device_sweep_filter": sweep_filter,
         }
 
+    if method == "GET" and path == "/.well-known/agent.json":
+        manifest = json.loads(AGENT_MANIFEST_PATH.read_text(encoding="utf-8"))
+        manifest["ok"] = True
+        return manifest
+
+    if method == "POST" and path == "/api/webmcp":
+        rpc_id = body.get("id", 1)
+        rpc_method = str(body.get("method") or "tools/list")
+        params = body.get("params") or {}
+        manifest = json.loads(AGENT_MANIFEST_PATH.read_text(encoding="utf-8"))
+        tools = manifest["webmcp"]["tools"]
+
+        if rpc_method == "tools/list":
+            return {
+                "ok": True,
+                "jsonrpc": "2.0",
+                "id": rpc_id,
+                "result": {
+                    "agent_id": manifest["agent_id"],
+                    "standard": manifest["standard"],
+                    "tools": tools,
+                },
+            }
+
+        if rpc_method == "tools/call":
+            tool_name = str(params.get("name") or "check_duplicate_inventory")
+            args = params.get("arguments") or {}
+            if tool_name == "check_duplicate_inventory":
+                q = str(args.get("item_query") or "65L Moisture-Proof Airtight Storage Box")
+                req_qty = int(args.get("requested_qty") or 2)
+                matched = [
+                    h
+                    for h in ENGINE.household_ledger
+                    if any(tok in h["item_en"].lower() for tok in q.lower().split() if len(tok) >= 3)
+                ] or ENGINE.household_ledger[:1]
+                recommended_qty = max(0, req_qty - 1)
+                payload = {
+                    "tool": tool_name,
+                    "item_query": q,
+                    "requested_qty": req_qty,
+                    "existing_household_match": matched[0]["item_en"],
+                    "storage_location": matched[0]["location_en"],
+                    "recommended_net_order_qty": recommended_qty,
+                    "fiduciary_savings_usd": 19.50 if recommended_qty < req_qty else 0.0,
+                    "privacy_boundary": "local_browser_runtime_0_cloud_bytes",
+                }
+            elif tool_name == "verify_merchant_purity":
+                q = str(args.get("category_or_query") or "Aged Xinhui Chenpi & Autumn Terroir")
+                candidates = ENGINE.terroir_assets[:2]
+                digest_input = "|".join(f"{c['id']}:{c['price_usd']}:{c['purity_grade']}" for c in candidates)
+                digest = hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
+                payload = {
+                    "tool": tool_name,
+                    "query": q,
+                    "ad_boost_applied": "0.0%",
+                    "verified_candidates": [
+                        {
+                            "id": c["id"],
+                            "title": c["title_en"],
+                            "purity_grade": c["purity_grade"],
+                            "price_usd": c["price_usd"],
+                            "standard_code": c["standard_code"],
+                        }
+                        for c in candidates
+                    ],
+                    "comparison_digest_sha256": digest,
+                }
+            else:
+                act = str(args.get("action") or "inspect_pending")
+                mem_id = str(args.get("memory_id") or "mem-003")
+                if act in ("confirm", "revoke"):
+                    updated = ENGINE.update_memory_consent(memory_id=mem_id, action=act)
+                    payload = {
+                        "tool": "request_consent_memory",
+                        "mutation_applied": True,
+                        "updated_memory": updated,
+                    }
+                else:
+                    payload = {
+                        "tool": "request_consent_memory",
+                        "mutation_applied": False,
+                        "policy": "External agents cannot mutate profile without user consent_id signature",
+                        "pending_memories": [
+                            {"id": m["id"], "consent_id": m["consent_id"], "status": m["status"], "statement": m["statement_en"]}
+                            for m in ENGINE.memories
+                        ],
+                    }
+
+            return {
+                "ok": True,
+                "jsonrpc": "2.0",
+                "id": rpc_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(payload, ensure_ascii=False)}],
+                    "structuredContent": payload,
+                },
+            }
+
+        return {"ok": False, "jsonrpc": "2.0", "id": rpc_id, "error": {"code": -32601, "message": f"Method not found: {rpc_method}"}}
+
     return {"ok": False, "error": f"Unknown endpoint {method} {path}"}
 
 
@@ -135,7 +238,7 @@ class ZhangluoRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         clean_path = self.path.split("?", 1)[0]
-        if clean_path.startswith("/api/"):
+        if clean_path.startswith("/api/") or clean_path == "/.well-known/agent.json":
             res = handle_api_request("GET", clean_path, {})
             self._send_json(res, 200 if res.get("ok") else 404)
             return

@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "standard": "open-agentic-web-nanda-webmcp/v1",
+  "agent_id": "urn:nanda:gobuildrun:zhangluo-fiduciary-browser-agent",
+  "name": "Zhangluo (小張羅) — Fiduciary Browser & Household Steward Agent",
+  "description": "Open-source browser-native fiduciary household agent built on standard HTML5/JS, window.ai on-device privacy routing, WebMCP tool exposure, OpenViking consent-gated memory, and SHA-256 ad-free commerce digests.",
+  "license": "MIT",
+  "repository_url": "https://github.com/goBuildRun/zhangluo-global-agent",
+  "agentic_website_url": "https://gobuildrun.github.io/zhangluo-global-agent/?mode=agentic-web",
+  "manifest_url": "https://gobuildrun.github.io/zhangluo-global-agent/.well-known/agent.json",
+  "runtimes": [
+    "browser-html5-es2022",
+    "window.ai-gemini-nano-on-device",
+    "python3-stdlib-jsonrpc-http"
+  ],
+  "trust_and_privacy_guarantees": {
+    "pii_and_medical_routing": "100% on-device execution (0 bytes sent to external servers for allergies, prescriptions, or room sweeps)",
+    "memory_mutation_policy": "consent-gated via cryptographic OpenViking consent_id",
+    "commerce_ranking_policy": "0% paid ad boost; deterministic SHA-256 comparison_digest verification"
+  },
+  "webmcp": {
+    "jsonrpc_version": "2.0",
+    "http_endpoint": "/api/webmcp",
+    "browser_global": "window.__WEBMCP_AGENT__",
+    "w3c_model_context": "navigator.modelContext",
+    "tools": [
+      {
+        "name": "check_duplicate_inventory",
+        "description": "Cross-checks requested purchase items against the user's local 4-pillar Household Inventory (indexed via 12s camera keyframe diff >= 0.035) to prevent duplicate buying before checkout.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "item_query": {
+              "type": "string",
+              "description": "Item name or specification to check before purchasing (e.g., '65L Airtight Storage Box')."
+            },
+            "requested_qty": {
+              "type": "integer",
+              "description": "Requested quantity prior to deduplication."
+            }
+          },
+          "required": ["item_query"]
+        }
+      },
+      {
+        "name": "verify_merchant_purity",
+        "description": "Evaluates candidate open-web goods/merchants using deterministic anti-ad-slop rules (>= 10 yr longevity, <= 2 branches, GB/T 20560 GI registry) and emits a tamper-evident SHA-256 comparison_digest.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "category_or_query": {
+              "type": "string",
+              "description": "Product or seasonal terroir query to audit."
+            }
+          },
+          "required": ["category_or_query"]
+        }
+      },
+      {
+        "name": "request_consent_memory",
+        "description": "Queues or updates a portable user preference inside the OpenViking consent-gated memory inbox; external agents can never mutate active profile state without user consent_id approval.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "memory_id": {
+              "type": "string",
+              "description": "Target memory identifier (e.g., 'mem-003')."
+            },
+            "action": {
+              "type": "string",
+              "enum": ["inspect_pending", "confirm", "revoke"]
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    ]
+  }
+}

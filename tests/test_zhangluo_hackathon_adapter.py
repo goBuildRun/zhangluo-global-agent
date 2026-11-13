@@ -85,3 +85,30 @@ def test_openviking_memory_consent_and_proof_of_taste() -> None:
     )
     assert res_pot["ok"] is True
     assert res_pot["attestation"]["purity_grade"] == "AAA"
+
+
+def test_open_agentic_web_manifest_and_webmcp_jsonrpc() -> None:
+    manifest = handle_api_request("GET", "/.well-known/agent.json", {})
+    assert manifest["ok"] is True
+    assert manifest["standard"] == "open-agentic-web-nanda-webmcp/v1"
+    assert len(manifest["webmcp"]["tools"]) == 3
+
+    list_res = handle_api_request("POST", "/api/webmcp", {"jsonrpc": "2.0", "id": 10, "method": "tools/list"})
+    assert list_res["ok"] is True
+    assert len(list_res["result"]["tools"]) == 3
+
+    call_dup = handle_api_request(
+        "POST",
+        "/api/webmcp",
+        {
+            "jsonrpc": "2.0",
+            "id": 11,
+            "method": "tools/call",
+            "params": {"name": "check_duplicate_inventory", "arguments": {"item_query": "65L Storage Box", "requested_qty": 2}},
+        },
+    )
+    assert call_dup["ok"] is True
+    sc = call_dup["result"]["structuredContent"]
+    assert sc["fiduciary_savings_usd"] == 19.50
+    assert sc["recommended_net_order_qty"] == 1
+

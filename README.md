@@ -7,6 +7,7 @@
 [![Demo Video: YouTube 1080p](https://img.shields.io/badge/🎥%20Watch%20Demo%20Video-YouTube%201080p-red)](https://youtu.be/1wwW4HmMAUA)
 
 > 🚀 **Try the Live Zero-Install Browser Workbench (No Login or Setup Required)**:
+> - 🕸️ **Open Agentic Web Mode (`WebMCP + .well-known/agent.json + window.ai`)**: **[https://gobuildrun.github.io/zhangluo-global-agent/?mode=agentic-web](https://gobuildrun.github.io/zhangluo-global-agent/?mode=agentic-web)** *(Manifest: [`/.well-known/agent.json`](https://gobuildrun.github.io/zhangluo-global-agent/.well-known/agent.json))*
 > - 🧠 **Hybrid AI Mode (`Chrome Built-in Gemini Nano ⇄ Firebase AI Logic`)**: **[https://gobuildrun.github.io/zhangluo-global-agent/?mode=hybrid-ai](https://gobuildrun.github.io/zhangluo-global-agent/?mode=hybrid-ai)**
 > - 🗄️ **UGREEN AI NAS Mode (`UGOS Pro` DXP4800 Plus Local RAID-1 Vault)**: **[https://gobuildrun.github.io/zhangluo-global-agent/?mode=ugreen](https://gobuildrun.github.io/zhangluo-global-agent/?mode=ugreen)**
 > - 💳 **Fiduciary Commerce Mode (`PayPal Orders v2 + Duplicate-Buy Guard`)**: **[https://gobuildrun.github.io/zhangluo-global-agent/?mode=paypal](https://gobuildrun.github.io/zhangluo-global-agent/?mode=paypal)**
